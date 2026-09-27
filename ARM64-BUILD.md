@@ -302,10 +302,15 @@ Al relanzar el app: **"Connected to device."**, Firmware ID `A504289E`,
 | Placa | Firmware nuevo (A504289E) flasheado |
 | Error `xcrun` | Resuelto por diseño: el app y sus hijos corren arm64 nativo |
 
-### Cambios en el repo (por commit)
+### Cambios en el repo (decisión 27/09/2026)
 
-- `external/jdks/mac_arm64/` — Zulu JDK 11 aarch64 (tarball + JDK extraído)
-- `packr-mac-arm64.json` — config del bundle arm64
+- **Fuera de git a propósito** (no trackear):
+  - `external/jdks/mac_arm64/` — Zulu JDK 11 aarch64 (tarball + JDK extraído,
+    ~500 MB). Para reproducir el build en otro Mac: descargar
+    **Zulu 11.0.32.1 (macOS aarch64)** de Azul Zulu y colocarlo en
+    `external/jdks/mac_arm64/` (ver §2.2).
+  - `packr-mac-arm64.json` — config del bundle arm64 (referencia el JDK de
+    arriba y `axoloti/dist/Axoloti.jar`; ver §2.6).
 - `Axoloti.jar` (dist + bundle) — con `org/usb4java/osx-aarch64/libusb4java.dylib`
 - (Opcional) el dylib aarch64 + script de build en el repo para reproducibilidad
 
@@ -327,5 +332,7 @@ Al relanzar el app: **"Connected to device."**, Firmware ID `A504289E`,
    aarch64`) + dylib usb4java de ambas arquitecturas.
 5. **Compilar un patch** de prueba para re-verificar en vivo la desaparición
    del error de `xcrun` (el camino arm64 ya está cubierto por diseño).
-6. **Commit de los cambios** en el repo (JDk, json, dylib, script de build del
-   launcher y del dylib usb4java).
+6. **Commit de los cambios** en el repo (dylib, script de build del launcher y
+   del dylib usb4java). **Decisión 27/09/2026:** `external/jdks/mac_arm64/`
+   y `packr-mac-arm64.json` quedan **fuera de git a propósito** (ver §5).
+   `ARM64-BUILD.md` sí quedó commiteado (commit `6cc3726`).
