@@ -105,6 +105,7 @@ public class DialComponent extends ACtrlComponent {
                 } else {
                     this.robotMoveToCenter();
                     double t = tick;
+                    t *= Preferences.getPreferences().getMouseDragSensitivity();
                     if (KeyUtils.isControlOrCommandDown(e)) {
                         t *= 0.1;
                     }

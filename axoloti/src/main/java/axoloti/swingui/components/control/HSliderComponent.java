@@ -17,6 +17,7 @@
  */
 package axoloti.swingui.components.control;
 
+import axoloti.preferences.Preferences;
 import axoloti.preferences.Theme;
 import java.awt.BasicStroke;
 import java.awt.Dimension;
@@ -54,7 +55,7 @@ public class HSliderComponent extends ACtrlComponent {
 
     @Override
     protected void mouseDragged(MouseEvent e) {
-        fireValue(value - px + e.getX());
+        fireValue(value - (px - e.getX()) * Preferences.getPreferences().getMouseDragSensitivity());
         px = e.getX();
     }
 

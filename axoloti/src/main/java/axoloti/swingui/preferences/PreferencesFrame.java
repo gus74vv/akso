@@ -77,6 +77,8 @@ public class PreferencesFrame extends javax.swing.JDialog {
         mouseWheelComboBox.setSelectedItem(
                 mouseWheelComboBox.getModel().getElementAt(prefs.getMouseWheelPan() ? 1 : 0));
 
+        jSpinnerDragSensitivity.setValue(prefs.getMouseDragSensitivity());
+
 //        jTable1.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 //            @Override
 //            public void valueChanged(ListSelectionEvent e) {
@@ -123,6 +125,7 @@ public class PreferencesFrame extends javax.swing.JDialog {
         prefs.setControllerObject(jTextFieldController.getText().trim());
         prefs.setControllerEnabled(jControllerEnabled.isSelected());
         prefs.setMouseWheelPan(mouseWheelComboBox.getSelectedItem().equals("Pan"));
+        prefs.setMouseDragSensitivity((Double) jSpinnerDragSensitivity.getValue());
     }
 
     final void populateLibrary() {
@@ -170,6 +173,8 @@ public class PreferencesFrame extends javax.swing.JDialog {
         jLabel9 = new javax.swing.JLabel();
         mouseWheelComboBox = new javax.swing.JComboBox();
         jCheckBoxNoMouseReCenter = new javax.swing.JCheckBox();
+        jSpinnerDragSensitivity = new javax.swing.JSpinner();
+        jLabel10 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -300,6 +305,10 @@ public class PreferencesFrame extends javax.swing.JDialog {
             }
         });
 
+        jSpinnerDragSensitivity.setModel(new javax.swing.SpinnerNumberModel(1.0, 0.05, 1.0, 0.05));
+        jSpinnerDragSensitivity.setPreferredSize(new java.awt.Dimension(70, 22));
+        jLabel10.setText("Drag sensitivity");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -329,7 +338,11 @@ public class PreferencesFrame extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
                                 .addGap(130, 130, 130)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel10)
+                                .addGap(130, 130, 130)
+                                .addComponent(jSpinnerDragSensitivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -394,6 +407,10 @@ public class PreferencesFrame extends javax.swing.JDialog {
                     .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBoxNoMouseReCenter)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(jSpinnerDragSensitivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
@@ -584,6 +601,8 @@ public class PreferencesFrame extends javax.swing.JDialog {
     private javax.swing.JButton jResetLib;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField jTextFieldController;
+    private javax.swing.JSpinner jSpinnerDragSensitivity;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JTextField jTextFieldPollInterval;
     private javax.swing.JComboBox mouseWheelComboBox;
     private javax.swing.JLabel txtFavDir;

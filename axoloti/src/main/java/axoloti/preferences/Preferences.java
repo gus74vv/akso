@@ -71,6 +71,8 @@ public class Preferences {
     @Element(required = false)
     private Boolean MouseDoNotRecenterWhenAdjustingControls;
     @Element(required = false)
+    private Double MouseDragSensitivity;
+    @Element(required = false)
     private Boolean ExpertMode;
     @ElementList(required = false)
     private ArrayList<String> recentFiles = new ArrayList<>();
@@ -127,6 +129,9 @@ public class Preferences {
         }
         if (MouseDoNotRecenterWhenAdjustingControls == null) {
             MouseDoNotRecenterWhenAdjustingControls = false;
+        }
+        if (MouseDragSensitivity == null) {
+            MouseDragSensitivity = 1.0;
         }
         if (ExpertMode == null) {
             ExpertMode = false;
@@ -361,6 +366,21 @@ public class Preferences {
             return;
         }
         this.MouseDoNotRecenterWhenAdjustingControls = MouseDoNotRecenterWhenAdjustingControls;
+        setDirty();
+    }
+
+    public double getMouseDragSensitivity() {
+        if (MouseDragSensitivity == null) {
+            return 1.0;
+        }
+        return MouseDragSensitivity;
+    }
+
+    public void setMouseDragSensitivity(double MouseDragSensitivity) {
+        if (this.MouseDragSensitivity == MouseDragSensitivity) {
+            return;
+        }
+        this.MouseDragSensitivity = MouseDragSensitivity;
         setDirty();
     }
 
