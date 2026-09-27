@@ -241,7 +241,7 @@
 #define STM32_ADC_DUAL_MODE                 FALSE
 #define STM32_ADC_COMPACT_SAMPLES           FALSE
 #define STM32_ADC_USE_ADC12                 TRUE
-#define STM32_ADC_USE_ADC3                  FALSE
+#define STM32_ADC_USE_ADC3                  TRUE
 #define STM32_ADC_ADC12_DMA_STREAM          STM32_DMA_STREAM_ID_ANY
 #define STM32_ADC_ADC3_BDMA_STREAM          STM32_BDMA_STREAM_ID_ANY
 #define STM32_ADC_ADC12_DMA_PRIORITY        2
@@ -525,6 +525,7 @@
 #define CCM __attribute__ ((section (".ram8")))
 #define BKPSRAM __attribute__ ((section (".ram7")))
 #define DMA_MEM_FW __attribute__ ((section (".ram3"))) __attribute__ ((aligned (32)))
+#define ADC3_MEM_FW __attribute__ ((section (".ram4"))) __attribute__ ((aligned (32)))
 #define SDMMC_MEM_FW __attribute__ ((section (".ram0a"))) __attribute__ ((aligned (32)))
 
 #endif /* MCUCONF_H */
