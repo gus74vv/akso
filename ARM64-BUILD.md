@@ -302,15 +302,17 @@ Al relanzar el app: **"Connected to device."**, Firmware ID `A504289E`,
 | Placa | Firmware nuevo (A504289E) flasheado |
 | Error `xcrun` | Resuelto por diseño: el app y sus hijos corren arm64 nativo |
 
-### Cambios en el repo (decisión 27/09/2026)
+### Cambios en el repo (decisión 27/09/2026, coherente con la convención
+existente de `external/jdks/*` de las otras plataformas)
 
-- **Fuera de git a propósito** (no trackear):
-  - `external/jdks/mac_arm64/` — Zulu JDK 11 aarch64 (tarball + JDK extraído,
-    ~500 MB). Para reproducir el build en otro Mac: descargar
-    **Zulu 11.0.32.1 (macOS aarch64)** de Azul Zulu y colocarlo en
-    `external/jdks/mac_arm64/` (ver §2.2).
-  - `packr-mac-arm64.json` — config del bundle arm64 (referencia el JDK de
-    arriba y `axoloti/dist/Axoloti.jar`; ver §2.6).
+- **Trackeado:** `external/jdks/mac_arm64/zulu11-macosx_aarch64.tar.gz`
+  (Zulu JDK 11 aarch64, ~190 MB — igual que los JDKs de linux_x64/mac_x64/
+  win_x64 del repo) y `packr-mac-arm64.json` (config del bundle arm64;
+  ver §2.6). En otro Mac: descomprimir el tarball en `external/jdks/mac_arm64/`
+  (ver §2.2).
+- **Ignorado (`.gitignore`):** el JDK extraído
+  `external/jdks/mac_arm64/zulu11.90.205-ca-jdk11.0.32.1-macosx_aarch64/`
+  (~300 MB).
 - `Axoloti.jar` (dist + bundle) — con `org/usb4java/osx-aarch64/libusb4java.dylib`
 - (Opcional) el dylib aarch64 + script de build en el repo para reproducibilidad
 
@@ -333,6 +335,6 @@ Al relanzar el app: **"Connected to device."**, Firmware ID `A504289E`,
 5. **Compilar un patch** de prueba para re-verificar en vivo la desaparición
    del error de `xcrun` (el camino arm64 ya está cubierto por diseño).
 6. **Commit de los cambios** en el repo (dylib, script de build del launcher y
-   del dylib usb4java). **Decisión 27/09/2026:** `external/jdks/mac_arm64/`
-   y `packr-mac-arm64.json` quedan **fuera de git a propósito** (ver §5).
-   `ARM64-BUILD.md` sí quedó commiteado (commit `6cc3726`).
+   del dylib usb4java). **Decisión 27/09/2026:** tarball del JDK y
+   `packr-mac-arm64.json` trackeados (convención `external/jdks/*`); solo el
+   JDK extraído queda en `.gitignore` (ver §5).

@@ -1,0 +1,26 @@
+{
+    "platform": "mac",
+    "jdk": "external/jdks/mac_arm64/zulu11-macosx_aarch64.tar.gz",
+    "executable": "Akso",
+    "classpath": [
+        "axoloti/dist/Axoloti.jar"
+    ],
+    "removelibs": [
+        "axoloti/dist/Axoloti.jar"
+    ],
+    "mainclass": "axoloti.Axoloti",
+    "vmargs": [
+        "Xms1G",
+        "Xmx1G"
+    ],
+    "resources": [
+        "external",
+        "axoloti/firmware",
+        "axoloti/platform_osx"
+    ],
+    "minimizejre": "hard",
+    "output": "package/mac/Akso.app",
+    "verbose": true,
+    "bundle": "org.zrna.akso",
+    "icon": "axoloti/src/main/java/resources/axoloti_512x512.icns"
+}
