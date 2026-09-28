@@ -316,7 +316,9 @@ Rosetta) se rebuildea con `make`; copiar `mounter.{sram1,sram3,sdram}.bin` a
 `d7d66975…`.
 
 **Ojo:** en paralelo apareció otro bug pre-existente — el firmware principal
-desmonta la SD al arrancar (`SDCSW`=GPIOD13 lee 1). Intentar dejarla montada
+monta la SD de forma **intermitente** al arrancar (`SDCSW`=GPIOD13 lee 1 en
+muchos arranques → `sysmon` la desmonta; cuando pasa, arrancar un patch la
+remonta). Intentar dejarla montada
 vía `sysmon` (seed de `sdcsw_prev`) **rompe el arranque de patches**; y
 habilitar BKPRAM con el `while(BRRDY)` cuelga el boot. Documentado en
 `AGENTS.md`; recuperable por DFU. No es parte de mass storage.

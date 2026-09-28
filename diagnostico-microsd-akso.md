@@ -76,7 +76,8 @@ La microSD fue formateada fuera del SoC (MBR + FAT32, offset 1 MiB) y sus
 archivos se restauraron por lector USB en la Mac (`/shared/808/*.raw` desde
 `~/Library/Akso/akso-factory/objects/wave/`).
 
-**Pendiente relacionado (no parte de este fix):** el firmware principal sigue
-desmontando la SD al arrancar (`SDCSW`/GPIOD13 lee 1 en Akso). Se monta recién
-al arrancar el primer patch. Ver `AGENTS.md` §"Pendiente: SD no monta al
-arrancar".
+**Pendiente relacionado (no parte de este fix):** el firmware principal monta
+la SD de forma **intermitente** al arrancar: `sysmon` lee `SDCSW`/GPIOD13 (que
+en Akso da 1 en muchos arranques) e interpreta "extraída" → desmonta. Cuando
+pasa eso, arrancar un patch la vuelve a montar. Ver `AGENTS.md` §"Pendiente:
+SD monta de forma INTERMITENTE al arrancar".
