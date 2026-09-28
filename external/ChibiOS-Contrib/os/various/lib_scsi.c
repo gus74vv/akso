@@ -367,6 +367,14 @@ static bool data_read_write10(SCSITarget *scsip, const uint8_t *cmd) {
     size_t i = 0;
     for (i=0; i<req.blk_cnt; i++) {
       if (cmd[0] == SCSI_CMD_READ_10) {
+        /* The SDMMC IDMA engine does not snoop the Cortex-M7 D-cache.
+           blkbuf lives in cacheable AXI SRAM and is reused for every
+           sector, so drop any stale cached lines before arming the DMA
+           read; otherwise the CPU keeps serving the first block ever
+           cached (all LBAs look like block 0).
+           Assumes blkbuf is cache-line aligned (32 bytes), which is a
+           contract of the caller (msdStart). */
+        cacheBufferInvalidate(buf, bs);
         // TODO: block error handling
         blkRead(blkdev, req.first_lba + i, buf, 1);
         tr->transmit(tr, buf, bs);
@@ -374,6 +382,10 @@ static bool data_read_write10(SCSITarget *scsip, const uint8_t *cmd) {
       else {
         // TODO: block error handling
         tr->receive(tr, buf, bs);
+        /* blkbuf was just written by the CPU (USB receive) and is still
+           only in D-cache (write-back). Clean it to RAM before the IDMA
+           write, otherwise the card receives stale sector data. */
+        cacheBufferFlush(buf, bs);
         blkWrite(blkdev, req.first_lba + i, buf, 1);
       }
     }

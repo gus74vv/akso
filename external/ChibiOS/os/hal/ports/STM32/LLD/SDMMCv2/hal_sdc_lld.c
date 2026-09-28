@@ -724,10 +724,8 @@ bool sdc_lld_write_aligned(SDCDriver *sdcp, uint32_t startblk,
   sdcp->sdmmc->DTIMER = STM32_SDC_SDMMC_WRITE_TIMEOUT;
 
   /* Checks for errors and waits for the card to be ready for writing.*/
-  if (_sdc_wait_for_transfer_state(sdcp)) {
-      while(1);
-      return HAL_FAILED;
-  }
+  if (_sdc_wait_for_transfer_state(sdcp))
+    return HAL_FAILED;
 
   /* Setting up data transfer.*/
   sdcp->sdmmc->ICR   = SDMMC_ICR_ALL_FLAGS;
