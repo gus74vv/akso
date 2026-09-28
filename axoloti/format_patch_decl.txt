@@ -1,0 +1,38 @@
+FRESULT fs_error = FR_OK;
+// Diagnosticos (valores crudos)
+int diag_connect;   // sdcConnect: 0=OK
+int diag_capacity;  // SDCD1.capacity (bloques, 0=no detectada)
+int diag_state;     // SDCD1.state (debe ser 5=BLK_READY)
+int diag_read;      // sdcRead: 0=OK
+int diag_write;     // sdcWrite: 0=OK
+bool pconfirm;
+bool ready;
+BYTE mkfs_work[4096] __attribute__((aligned(32)));
+
+msg_t ThreadX2(){
+  pconfirm = 1;
+  // 1) reset y reconectar la tarjeta
+  sdcDisconnect(&SDCD1);
+  diag_connect = sdcConnect(&SDCD1);
+  // 2) leer capacity/state
+  diag_capacity = (int)SDCD1.capacity;
+  diag_state = (int)SDCD1.state;
+  // 3) test lectura sector 0
+  BYTE rbuf[512];
+  diag_read = sdcRead(&SDCD1, 0, rbuf, 1);
+  // 4) test escritura sector 1 (no pisar MBR en sector 0)
+  BYTE wbuf[512];
+  diag_write = sdcWrite(&SDCD1, 1, wbuf, 1);
+  // 5) f_mkfs
+  fs_error = f_mkfs("0:", 0, mkfs_work, sizeof(mkfs_work));
+  ready = 1;
+  return 0;
+}
+
+static msg_t ThreadX(void *arg){
+  ((attr_parent *)arg)->ThreadX2();
+  return 0;
+}
+
+WORKING_AREA(waThreadX, 4096);
+Thread *pThd;

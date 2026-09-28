@@ -1,0 +1,73 @@
+<objdefs appVersion="1.0.11">
+  <obj.normal id="format" uuid="511fcd12-757d-423b-a2d1-ffc46911b9d3">
+    <sDescription>SD format (FAT) - diagnostico D-cache. Mantiene confirm1 (toggle) y presiona confirm2: crea thread que deshabilita D-cache y ejecuta f_mkfs. Displays: busy/succeeded/failed (0/1), b0=fs_error, b1=progress, b2=capacity, b3=state, b4=cid[0]</sDescription>
+    <author>Johannes Taelman</author>
+    <license>BSD</license>
+    <inlets />
+    <outlets />
+    <displays>
+      <int32.label name="busy" />
+      <int32.label name="succeeded" />
+      <int32.label name="failed" />
+      <int32.label name="b0" />
+      <int32.label name="b1" />
+      <int32.label name="b2" />
+      <int32.label name="b3" />
+      <int32.label name="b4" />
+    </displays>
+    <params>
+      <bool32.tgl name="confirm1" />
+      <bool32.mom name="confirm2" />
+    </params>
+    <attribs />
+    <code.declaration>FRESULT fs_error = FR_OK;
+int progress = 0;
+int d_cap = -1;
+int d_state = -1;
+int d_cid = -1;
+bool pconfirm = 0;
+BYTE mkfs_work[4096] __attribute__((aligned(32)));
+
+msg_t ThreadX2(){
+  progress = 1;
+  // === OPCION A: deshabilitar D-cache global antes de I/O SD ===
+  SCB_DisableDCache();
+  SCB_CleanInvalidateDCache();
+  // estado del driver SD (diagnostico de deteccion)
+  d_cap = (int)SDCD1.capacity;
+  d_state = (int)SDCD1.state;
+  d_cid = (int)SDCD1.cid[0];
+  progress = 2;
+  fs_error = f_mkfs("0:", 0, mkfs_work, sizeof(mkfs_work));
+  progress = 3;
+  return 0;
+}
+
+static msg_t ThreadX(void *arg){
+  ((instanceformat__1 *)arg)-&gt;ThreadX2();
+}
+
+WORKING_AREA(waThreadX, 8192);
+Thread *pThd = 0;
+</code.declaration>
+    <code.dispose>if (pThd) {
+  chThdTerminate(pThd);
+  chThdWait(pThd);
+  pThd = 0;
+}</code.dispose>
+    <code.krate>if (param_confirm1 &amp;&amp; param_confirm2 &amp;&amp; !pconfirm){
+  pconfirm = 1;
+  pThd = chThdCreateStatic(waThreadX, sizeof(waThreadX),
+                           NORMALPRIO, ThreadX, (void *)this);
+}
+disp_busy = (pThd != 0) &amp;&amp; (progress &lt; 3) ? 1 : 0;
+disp_succeeded = (progress == 3 &amp;&amp; fs_error == FR_OK) ? 1 : 0;
+disp_failed = (progress == 3 &amp;&amp; fs_error != FR_OK) ? 1 : 0;
+disp_b0 = (int)fs_error;
+disp_b1 = progress;
+disp_b2 = d_cap;
+disp_b3 = d_state;
+disp_b4 = d_cid;
+</code.krate>
+  </obj.normal>
+</objdefs>
