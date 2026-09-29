@@ -132,15 +132,7 @@ USBH_StatusTypeDef USBH_Get_CfgDesc(USBH_HandleTypeDef *phost,
 
 {
   USBH_StatusTypeDef status;
-  uint8_t *pData = phost->device.CfgDesc_Raw;
-
-  /* Never read more than the raw buffer can hold. CfgDesc_Raw lives inside
-     hUSBHost in .ram3; devices with large configuration descriptors would
-     otherwise overflow it and corrupt host state during enumeration. */
-  if (length > USBH_MAX_SIZE_CONFIGURATION)
-  {
-    length = USBH_MAX_SIZE_CONFIGURATION;
-  }
+  uint8_t *pData = phost->device.CfgDesc_Raw;;
 
   if ((status = USBH_GetDescriptor(phost, (USB_REQ_RECIPIENT_DEVICE | USB_REQ_TYPE_STANDARD),
                                    USB_DESC_CONFIGURATION, pData, length)) == USBH_OK)
