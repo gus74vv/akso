@@ -487,7 +487,6 @@ static THD_FUNCTION(BulkWriter, arg) {
 		switch (evt) {
 		case evt_bulk_tx_ack:
 			msg = bulk_tx_ack();
-			exception_checkandreport();
 			break;
 		case evt_bulk_fw_ver:
 			msg = bulk_tx_fw_version();
@@ -743,6 +742,7 @@ static THD_FUNCTION(BulkReader, arg) {
       if (header == rcv_hdr_ping) {
     	  // AxoP : ping
           isConnected = 1;
+          exception_checkandreport();
     	  chEvtSignal(thd_bulk_Writer,evt_bulk_tx_ack);
     	  if (!patchStatus) {
         	  chEvtSignal(thd_bulk_Writer,evt_bulk_tx_paramchange);
