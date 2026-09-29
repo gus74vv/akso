@@ -134,18 +134,6 @@ SECTIONS
         __eth_end__ = .;
     } > ETH_RAM
 
-    /* Exception dump: NOINIT so it survives the NVIC_SystemReset() that
-       follows a fault. Not zeroed by crt0 (only .bss is) nor by crt1
-       (only the ram_areas table is). */
-    .noinit (NOLOAD) : ALIGN(4)
-    {
-        __noinit_base__ = .;
-        *(.noinit)
-        *(.noinit.*)
-        . = ALIGN(4);
-        __noinit_end__ = .;
-    } > BSS_RAM
-
     .ram0a_init : ALIGN(4)
     {
         __ram0a_init_text__ = LOADADDR(.ram0a_init);

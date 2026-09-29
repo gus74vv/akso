@@ -77,9 +77,7 @@ typedef struct {
 
 #if BOARD_AKSO
 #define BKPSRAM_BASE D3_BKPSRAM_BASE
-/* .noinit: survives the NVIC_SystemReset() that follows a fault. A plain
-   BSS variable would be zeroed by crt0 at boot and lose the dump. */
-__attribute__((section(".noinit"))) exceptiondump_t _exceptiondump;
+exceptiondump_t _exceptiondump;
 #define exceptiondump ((exceptiondump_t *) &_exceptiondump)
 #else
 #define exceptiondump ((exceptiondump_t *) BKPSRAM_BASE)
@@ -303,6 +301,7 @@ void exception_checkandreport(void) {
             LogTextMessage("unknown exception?");
         }
 
+#if 0 // causes crash?
         if (report_registers) {
             LogTextMessage("pc=0x%x", exceptiondump->pc);
             LogTextMessage("psr=0x%x", exceptiondump->psr);
@@ -320,6 +319,9 @@ void exception_checkandreport(void) {
                 LogTextMessage("mmfar=0x%x",exceptiondump->mmfar);
             }
         }
+#else
+        (void)report_registers;
+#endif
     }
 }
 
