@@ -19,6 +19,7 @@ package axoloti.patch.object.attribute;
 
 import axoloti.object.attribute.AxoAttributeObjRef;
 import axoloti.patch.object.AxoObjectInstance;
+import axoloti.patch.object.IAxoObjectInstance;
 import axoloti.utils.CharEscape;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +49,12 @@ public class AttributeInstanceObjRef extends AttributeInstanceString<AxoAttribut
             o = "";
         }
         if (o.isEmpty()) {
-            Logger.getLogger(AttributeInstanceObjRef.class.getName()).log(Level.SEVERE, "incomplete object reference attribute");
+            IAxoObjectInstance p = getParent();
+            Logger.getLogger(AttributeInstanceObjRef.class.getName()).log(Level.SEVERE,
+                    "incomplete object reference attribute: object '"
+                    + (p == null ? "?" : p.getInstanceName())
+                    + "' (" + (p == null ? "?" : p.getTypeName())
+                    + "), attribute '" + getName() + "' has no target object");
         }
         String o2 = "parent->";
         /* FIXME: object references to object in parent patch...
