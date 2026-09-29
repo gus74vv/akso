@@ -28,6 +28,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
 #include "usbh_core.h"
+#include "usbh.h"
 
 HCD_HandleTypeDef hhcd;
 
@@ -500,6 +501,11 @@ void MY_USBH_Init(void) {
 
   /* Init Host Library */
   USBH_Init(&hUSBHost, USBH_UserProcess, 0);
+
+  /* Initialize the USB host MIDI output ring buffers, so their notify
+   * callback is valid before the first MidiSend() routed to a USB host
+   * port (a NULL notify crashes in midi_output_buffer_put()). */
+  usbhmidi_init_buffers();
 
   /* Add Supported Class */
   /* highest priority first */
