@@ -2,7 +2,6 @@
 #include "midi_routing.h"
 #include "midi_buffer.h"
 #include "midi_usbh.h"
-#include "usbh.h"
 
 // map 16 usb host ports of usbh-midi device #1 to 16 virtual ports
 midi_routing_t midi_inputmap_usbh1 = {
@@ -98,23 +97,7 @@ midi_routing_t midi_outputmap_usbh2 = {
 			}
 };
 
-// Called from the patch (k-rate) thread whenever a message is put
-// into one of the USB host MIDI output ring buffers. Wakes the USB
-// host thread so the message gets drained right away (same event
-// that USBH_MIDI_SOFProcess posts on every SOF).
-static void usbhmidi_notify(void *obj) {
-    (void)obj;
-    osMessagePut(hUSBHost.os_event, (uint32_t)USBH_CLASS_EVENT, 0U);
-}
-
-// Initialize the output ring buffers with a valid notify callback.
-// Without this, out_buffer.notify stays NULL (zero-cleared struct)
-// and the first MidiSend() routed to a USB host port crashes in
-// midi_output_buffer_put().
-void usbhmidi_init_buffers(void) {
-    midi_output_buffer_objinit(&USBHMIDIC[0].out_buffer, usbhmidi_notify);
-    midi_output_buffer_objinit(&USBHMIDIC[1].out_buffer, usbhmidi_notify);
-}
+#define USBH_DbgLog(x)
 
 static void usbh_midi_dispatch(midi_message_t m, int32_t portmap[]) {
 	int32_t inputmap = portmap[m.fields.port];
