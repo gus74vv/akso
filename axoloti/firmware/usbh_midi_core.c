@@ -402,7 +402,7 @@ USBH_StatusTypeDef USBH_MIDI_ProcessOutput(USBH_HandleTypeDef *phost) {
                 USBH_ErrLog("USB Host Output(SD) ERROR");
                 USBH_ClrFeature(phost, MIDI_Handle->OutEp);
             }
-            static midi_message_t outbuf[4];
+            static midi_message_t outbuf[4] __attribute__((section(".ram3"))) __attribute__((aligned(32)));
 			midi_message_t *m = &outbuf[0];
 			int s;
 			midi_output_buffer_t *b = &USBHMIDIC[0].out_buffer;
