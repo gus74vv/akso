@@ -1,0 +1,24 @@
+# Proyecto AKSO (STM32H753)
+
+## Estado actual
+- Firmware actual: **fwid `012F09F4`** (baseline). Build en `axoloti/firmware/build/`.
+- Build de referencia D320170D (exception dump) en `/private/tmp/d320170d/axoloti/firmware/build/` (worktree git en `32e892e`).
+
+## Hotplug: lo que se intentó y falló
+1. **`29da301` (libusb_reset_device en disconnect)**: no rompió el patch 303, tampoco resolvió el hotplug. REVERTIDO.
+2. **`32e892e` (exception dump: noinit + reporte de PC)**: **SÍ rompió el audio del 303** (no suena). REVERTIDO.
+
+### Diagnóstico del rompimiento de `32e892e` (layout)
+Se comparó el layout de RAM entre el baseline (`012F09F4`) y `D320170D`:
+- **`.noinit` NO solapa ninguna sección** (verificado con `arm-none-eabi-objdump -h`).
+- **`.ram3` (donde va la memoria del patch) tiene la misma dirección y tamaño en ambos builds** → el exception dump NO empujó ni pisó la memoria del patch.
+- Conclusión: el rompimiento NO es por layout. Queda pendiente: (a) ¿el `.noinit` sobrevive al flash DFU sin ser tocado? (b) ¿el reporte de PC (ping handler) introduce un deadlock en la conexión USB? Ver AGENTS.md para el detalle.
+
+## Próximos pasos (próxima sesión)
+- Reabrir el tema hotplug con los reverts en el historial.
+- Si se re-intenta el exception dump: verificar que el `.noinit` no sea clobbered y que el ping handler no deadlock.
+
+## Toolchain
+- `external/gcc-arm/mac/gcc-arm-none-eabi-8-2019-q3-update/bin` (arm-none-eabi-gcc/objdump).
+- Build firmware: `cd axoloti/firmware && make` (PATH con la toolchain).
+- Build GUI/jar: `cd axoloti && ant`.
