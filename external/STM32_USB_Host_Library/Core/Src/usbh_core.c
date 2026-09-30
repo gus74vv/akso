@@ -1221,7 +1221,8 @@ void USBH_LL_PortEnabled(USBH_HandleTypeDef *phost)
 #if (USBH_USE_OS == 1U)
   phost->os_msg = (uint32_t)USBH_PORT_EVENT;
 #if (osCMSIS < 0x20000U)
-  (void)osMessagePut(phost->os_event, phost->os_msg, 0U);
+  /* called from the HCD ISR -> must use the ISR-safe variant */
+  (void)osMessagePutI(phost->os_event, phost->os_msg, 0U);
 #else
   (void)osMessageQueuePut(phost->os_event, &phost->os_msg, 0U, NULL);
 #endif
@@ -1273,7 +1274,8 @@ USBH_StatusTypeDef  USBH_LL_Connect(USBH_HandleTypeDef *phost)
 #if (USBH_USE_OS == 1U)
   phost->os_msg = (uint32_t)USBH_PORT_EVENT;
 #if (osCMSIS < 0x20000U)
-  (void)osMessagePut(phost->os_event, phost->os_msg, 0U);
+  /* called from the HCD ISR -> must use the ISR-safe variant */
+  (void)osMessagePutI(phost->os_event, phost->os_msg, 0U);
 #else
   (void)osMessageQueuePut(phost->os_event, &phost->os_msg, 0U, NULL);
 #endif
@@ -1305,7 +1307,8 @@ USBH_StatusTypeDef  USBH_LL_Disconnect(USBH_HandleTypeDef *phost)
 #if (USBH_USE_OS == 1U)
   phost->os_msg = (uint32_t)USBH_PORT_EVENT;
 #if (osCMSIS < 0x20000U)
-  (void)osMessagePut(phost->os_event, phost->os_msg, 0U);
+  /* called from the HCD ISR -> must use the ISR-safe variant */
+  (void)osMessagePutI(phost->os_event, phost->os_msg, 0U);
 #else
   (void)osMessageQueuePut(phost->os_event, &phost->os_msg, 0U, NULL);
 #endif
@@ -1365,7 +1368,8 @@ USBH_StatusTypeDef  USBH_LL_NotifyURBChange(USBH_HandleTypeDef *phost)
   phost->os_msg = (uint32_t)USBH_PORT_EVENT;
 
 #if (osCMSIS < 0x20000U)
-  (void)osMessagePut(phost->os_event, phost->os_msg, 0U);
+  /* called from the HCD ISR -> must use the ISR-safe variant */
+  (void)osMessagePutI(phost->os_event, phost->os_msg, 0U);
 #else
   (void)osMessageQueuePut(phost->os_event, &phost->os_msg, 0U, NULL);
 #endif
