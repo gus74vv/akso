@@ -85,7 +85,7 @@ msg_t midi_output_buffer_put(midi_output_buffer_t *obj, midi_message_t midi) {
 	}
 	obj->buf[next] = midi;
 	obj->write_index = next;
-	obj->notify(obj);
+	if (obj->notify) obj->notify(obj);
 	return MSG_OK;
 }
 
@@ -98,7 +98,7 @@ msg_t midi_output_buffer_get(midi_output_buffer_t *obj, midi_message_t *midi) {
 }
 
 void midi_output_buffer_notify(midi_output_buffer_t *obj) {
-	obj->notify(obj);
+	if (obj->notify) obj->notify(obj);
 }
 
 int midi_output_buffer_getpending(midi_output_buffer_t *obj) {
