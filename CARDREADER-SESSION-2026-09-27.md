@@ -373,3 +373,27 @@ reflashear el board: el firmware principal no cambió.
 
 **Validado en hardware (2026-10-01):** con el controlador MIDI en el puerto host,
 card reader mode monta la SD y el board ya no se cuelga. Fix confirmado.
+
+### Pendiente conocido — no hay camino de vuelta del card reader (deferido 01/10/2026)
+
+**Síntoma:** al expulsar la SD desde macOS, el mounter sigue corriendo (LED
+parpadeando) y el patcher no reconecta
+(`No available USB device found with matching PID/VID`). Requiere **power
+cycle** (o DFU/reset).
+
+**Causa:** el mounter toma la MCU (`_crt0_entry → main()`) y termina en un loop
+infinito; `msdStop()` es inalcanzable. Expulsar solo desmonta el volumen, el USB
+sigue enumerado como MSD **ST `0x0483/0x5740`**, mientras el patcher busca
+**`0x16C0/0x0442`** (`IConnection.java`). El mensaje del patcher
+("eject ... to enable editor connection again") es engañoso. El upstream lo
+tenía anotado como TODO en ese loop (*"do a system reset when card is unmounted
+by host..."*) y nunca lo implementó.
+
+**Opciones para cuando se retome:**
+- **A (mínima):** en el mounter, manejar SCSI `START_STOP_UNIT` (0x1B) con
+  `LoEj=1` → `NVIC_SystemReset()` (vuelve al firmware principal y el patcher
+  reconecta). `lib_scsi.c` se compila **solo** en el mounter. Depende de que
+  macOS mande ese comando al expulsar (validar en hardware).
+- **B (robusta, toca la app):** al no encontrar `0x16C0/0x0442` pero ver el MSD
+  ST `0x0483/0x5740`, el patcher hace `libusb_reset_device()`; el mounter
+  resetea al recibir `USB_EVENT_RESET` estando ya configurado.
