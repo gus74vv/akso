@@ -110,6 +110,11 @@ bundle instalado; hash original `3dbb8d892c908c623c25750e4de2fb143f2e07e5e704045
   `thumb/v7e-m+fp/hard` (cortex-m7 hard-float) + headers + binutils. **No sirve
   para compilar *firmware*** ni otras arquitecturas. El firmware sigue
   compilándose con el toolchain x86 (Rosetta) documentado en `ARM64-BUILD.md`.
+- El toolchain x86 del firmware **salió del working tree del repo** (espacio).
+  Está en `~/Library/Akso/rollback-gcc8-20260930/…-mac-x86.tar.zst` (204 MB
+  extraído) y verifiqué que conserva lo necesario para el firmware
+  (`libc_nano.a`, `libgcc.a`, `crt0.o`, `nano.specs`/`nosys.specs`). Para
+  compilar firmware: extraerlo y poner su `bin` en `PATH` (ver AGENTS.md).
 - Se eliminaron de los bundles: `gcc-arm/mac` (x86), y del dev bundle además
   `gcc-arm/linux`, `gcc-arm/win` y `external/jdks` (build-only). ~2,4 GB menos.
 - En el repo se eliminaron `external/gcc-arm/{linux,win,mac}` (el `mac` era el
