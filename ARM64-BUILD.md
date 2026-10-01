@@ -324,10 +324,12 @@ existente de `external/jdks/*` de las otras plataformas)
    backup) y/o distribuir el nuevo a otros Macs.
 2. **Firmar el bundle** (`codesign --force --deep -s -` ad-hoc) si se va a
    compartir fuera de la máquina (notarización solo si se publica).
-3. **Toolchain arm64**: reemplazar `external/gcc-arm/mac` por
+3. ~~**Toolchain arm64**: reemplazar `external/gcc-arm/mac` por
    `arm-none-eabi-gcc` arm64 (p. ej. Homebrew) para compilar firmware 100%
-   nativo. Cuidado: es otra versión del GCC; mejor validar con un patch
-   completo antes de dejarlo.
+   nativo.~~ **HECHO (30/09/2026) para el COMPILADOR DE PATCHES**: GCC 15.3 arm64
+   nativo en `<bundle>/external/gcc-arm/mac-arm64/` (podado, 280 MB), por
+   defecto vía `Makefile.patch`. El *firmware* sigue en el toolchain x86
+   (Rosetta). Mediciones y ROLLBACK en **`PATCH-COMPILER-ARM64.md`**.
 4. **Build universal** (para que el mismo bundle sirva en Intel y Apple
    Silicon): launcher universal (compilar el C++ con ambos `-arch`) + JRE
    universal (JDK multi-arch + `jlink --target-image x86_64 --target-image

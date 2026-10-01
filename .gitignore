@@ -2,3 +2,7 @@ TAGS
 .ccls-cache
 package
 external/jdks/mac_arm64/zulu11.90.205-ca-jdk11.0.32.1-macosx_aarch64/.DS_Store
+
+# Toolchain de patches arm64 (GCC 15.3): presente en el working tree y en los
+# bundles, pero no trackeado (280 MB de binarios). Ver PATCH-COMPILER-ARM64.md.
+external/gcc-arm/mac-arm64/

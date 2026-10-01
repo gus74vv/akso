@@ -1,4 +1,8 @@
-gcc_bin ?= ${external}/gcc-arm/${platform}/gcc-arm-none-eabi-8-2019-q3-update/bin
+# Compilador de patches: arm64 nativo (GCC 15.3) por defecto.
+# Fallback al GCC 8 x86 (Rosetta) si su directorio existe (rollback).
+GCC_ARM64 ?= ${external}/gcc-arm/${platform}-arm64/bin
+GCC_LEGACY ?= ${external}/gcc-arm/${platform}/gcc-arm-none-eabi-8-2019-q3-update/bin
+gcc_bin ?= $(if $(wildcard $(GCC_ARM64)/arm-none-eabi-g++),$(GCC_ARM64),$(GCC_LEGACY))
 
 ifeq (${platform},win)
 	suffix = .exe
