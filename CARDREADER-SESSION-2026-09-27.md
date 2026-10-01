@@ -322,3 +322,54 @@ remonta). Intentar dejarla montada
 vía `sysmon` (seed de `sdcsw_prev`) **rompe el arranque de patches**; y
 habilitar BKPRAM con el `while(BRRDY)` cuelga el boot. Documentado en
 `AGENTS.md`; recuperable por DFU. No es parte de mass storage.
+
+---
+
+## Follow-up 2026-10-01 — card reader cuelga si hay un controlador MIDI en el host
+
+**Síntoma:** al entrar en card reader mode con un controlador MIDI conectado al
+puerto USB host, el board se cuelga (LEDs apagados) y la SD **no** monta en la
+Mac. Sin controlador, monta bien. En ambos casos el patcher loguea
+`LIBUSB_ERROR_PIPE` / `TimeoutException` / `Disconnected from device` — eso es
+**esperado** (el device se re-enumera como Mass Storage, el log de
+`TargetMenu.jMenuItemMountActionPerformed` es informativo, no un fallo).
+
+**Causa raíz (VERIFICADA en las tablas de vectores):**
+- El firmware principal habilita el host USB en el NVIC:
+  `HAL_NVIC_EnableIRQ(OTG_HS_IRQn)` (`usbh_conf.c:153`). `USB_OTG_HS` =
+  `USB1_OTG_HS`, **IRQ 77**; su handler es `CH_IRQ_HANDLER(Vector174)` en
+  `usbh_conf.c` (el device USB es OTG_FS/USB2, IRQ 101 → otro vector).
+- El mounter toma el control llamando `_crt0_entry()` (`patch_init`). **Eso no
+  es un reset de MCU**: el `NVIC->ISER` (enable) y un eventual pending
+  sobreviven. ChibiOS sólo setea prioridades en `port_init`, y
+  `rccResetAHB1(~0)` de `halInit()` resetea el *periférico* pero no el NVIC.
+- En la imagen del mounter **no hay handler** para el host:
+  `Vector174 = 0x24000fc2 = _unhandled_exception` (`b .stay`, loop infinito),
+  mientras que `Vector1D4` (IRQ 101 = OTG_FS, device) sí está definido por
+  `hal_usb_lld.o`. Con un controlador conectado el host genera IRQs (SOF /
+  port-connect); al primer `cpsie i` (dentro de `chSysInit`) el CPU salta al
+  loop → kernel trabado, LEDs off, SD sin enumerar. Es la misma familia que el
+  hang de hot-plug de `AKSO-MIDI-HOST-FINDINGS.md` §9.
+
+**Fix aplicado** en `patch_init()` de `mounter/main.c` **y** `flasher/main.c`
+(el flasher tenía el mismo patrón vulnerable), antes de `_crt0_entry()`:
+
+```c
+NVIC_DisableIRQ(OTG_HS_IRQn);
+NVIC_ClearPendingIRQ(OTG_HS_IRQn);
+RCC->AHB1RSTR |= RCC_AHB1RSTR_USB1OTGHSRST;
+```
+
+**Build:** `make` en `axoloti/firmware/mounter` y `.../flasher` (toolchain x86
+GCC 8 bajo Rosetta; extraído del rollback a `external/gcc-arm/mac/...`).
+Hashes nuevos: mounter `8e60ad24…` (sram1), flasher `fddc1e1a…` (sram1).
+Backup de los bundles viejos en
+`~/Library/Akso/backup-hostirq-pre-20261001-132350/`.
+
+**Deploy:** set completo de mounter + flasher a
+`package/mac/Akso.app` **y** `/Applications/Akso.app`
+(`Contents/Resources/firmware/{mounter,flasher}/*_build/`). No requiere
+reflashear el board: el firmware principal no cambió.
+
+**Validado en hardware (2026-10-01):** con el controlador MIDI en el puerto host,
+card reader mode monta la SD y el board ya no se cuelga. Fix confirmado.

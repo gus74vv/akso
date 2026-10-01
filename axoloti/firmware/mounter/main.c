@@ -145,6 +145,17 @@ extern void _crt0_entry(void);
 
 void patch_init(int32_t fwID) {
 	(void)fwID;
+	/* The main firmware enables the USB host (USB1_OTG_HS, IRQ 77) in the
+	 * NVIC and never stops it. Jumping to this image is not an MCU reset,
+	 * so the NVIC enable (and a possible pending IRQ) survive, and this
+	 * image has no handler for that vector -> it lands in
+	 * _unhandled_exception (an infinite loop). With a controller attached
+	 * to the host port the first host IRQ hangs the CPU: LEDs go off and
+	 * the SD never enumerates. Disable the IRQ and keep the host core in
+	 * reset before taking over. */
+	NVIC_DisableIRQ(OTG_HS_IRQn);
+	NVIC_ClearPendingIRQ(OTG_HS_IRQn);
+	RCC->AHB1RSTR |= RCC_AHB1RSTR_USB1OTGHSRST;
 	_crt0_entry();
 }
 

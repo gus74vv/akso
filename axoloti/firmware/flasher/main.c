@@ -320,6 +320,13 @@ extern void _crt0_entry(void);
 void patch_init(int32_t fwID) {
 	(void)fwID;
 //	  asm("BKPT 255");
+	/* See mounter/main.c: the main firmware leaves the USB host
+	 * (USB1_OTG_HS, IRQ 77) enabled in the NVIC and this image has no
+	 * handler for that vector, so a pending host IRQ would hang the CPU
+	 * on takeover. Disable it and keep the host core in reset. */
+	NVIC_DisableIRQ(OTG_HS_IRQn);
+	NVIC_ClearPendingIRQ(OTG_HS_IRQn);
+	RCC->AHB1RSTR |= RCC_AHB1RSTR_USB1OTGHSRST;
 	_crt0_entry();
 }
 
