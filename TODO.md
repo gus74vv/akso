@@ -89,11 +89,10 @@ proposed fix.
   back. **Definition of done** per platform: `make package-<platform>` produces a
   bundle that launches, connects to the board, compiles a patch and flashes a
   firmware update.
-- **How to contribute:** open an issue at
-  <https://github.com/gus74vv/akso/issues> with OS + version, architecture, the
-  exact commands, the full output of any failing step and the commit built.
-  Instructions that turn out to be wrong will be fixed, and the platform will be
-  marked as validated (or dropped from the document).
+- **How to contribute:** reports are collected as-is (opening an issue is
+  welcome). Nobody here has a Mac Intel, Windows or Linux machine, so the
+  maintainer cannot reproduce or fix those builds — it is up to whoever has the
+  platform to validate and share the outcome.
 - Nice-to-have while doing it: record the produced `axoloti.bin` CRC32 and note
   whether it matches the macOS build (`05394BAC`) — a different CRC is fine, but
   the `.bin`/`.elf` pair must always match within your own build.

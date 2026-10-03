@@ -171,8 +171,3 @@ Notes per platform:
    corresponding source (this repository, or your own fork of it).
 
 ## 5. If you try it, report back
-
-Open an issue on <https://github.com/gus74vv/akso/issues> with: OS + version,
-architecture, the exact commands, the full output of the failing step, and the
-commit you built. Instructions that turn out to be wrong will be corrected here
-and the platform will be marked as validated (or dropped).
