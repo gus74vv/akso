@@ -54,8 +54,16 @@ firmware is ChibiOS/RT + ST's USB host library.
 - **Ejecting the SD in card reader mode does not return to the editor** (the
   mounter keeps running; a power cycle is needed). Two implementation options
   are described at the end of [`docs/CARD-READER-MASS-STORAGE.md`](docs/CARD-READER-MASS-STORAGE.md).
+- **Deleting objects/nets while a patch is live is not blocked.** The editor's
+  live lock ignores every delete path (keyboard, menu, cut, iolet context menu,
+  cable drag). Diagnosis and a surgical 1-file fix are ready but **not
+  implemented**: [`docs/PATCHER-LIVE-LOCK.md`](docs/PATCHER-LIVE-LOCK.md).
 - The bundled `STM32CubeProgrammer` CLI (used by "Board → Flash (rescue)") is
-  **2.4.0 x86_64** and runs under Rosetta.
+  **2.4.0/2.5.0 x86_64** and runs under Rosetta. `dfu-util` was evaluated as an
+  arm64 replacement and is **disqualified for writing** on this ROM bootloader:
+  it erases and then dies before the first data byte
+  ([`docs/DFU-WRITE-INCIDENT.md`](docs/DFU-WRITE-INCIDENT.md), including the
+  recovery procedure and the flash-safety discipline).
 
 ---
 

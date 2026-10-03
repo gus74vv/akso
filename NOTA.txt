@@ -1,24 +1,74 @@
-# Proyecto AKSO (STM32H753)
+# Proyecto AKSO (STM32H753) — nota interna
+
+> Estado al 2026-10-03. Este archivo queda a propósito **en español**: es mi nota
+> de trabajo. La documentación publicada (en inglés) está en `docs/`.
 
 ## Estado actual
-- Firmware actual: **fwid `012F09F4`** (baseline). Build en `axoloti/firmware/build/`.
-- Build de referencia D320170D (exception dump) en `/private/tmp/d320170d/axoloti/firmware/build/` (worktree git en `32e892e`).
 
-## Hotplug: lo que se intentó y falló
-1. **`29da301` (libusb_reset_device en disconnect)**: no rompió el patch 303, tampoco resolvió el hotplug. REVERTIDO.
-2. **`32e892e` (exception dump: noinit + reporte de PC)**: **SÍ rompió el audio del 303** (no suena). REVERTIDO.
+- **Firmware de la placa: fwid `05394BAC`** (CRC32 de `axoloti.bin`, 1210976 B).
+  Coincide con el que embebe `Akso.app` ("Local firmware CRC").
+- **Mounter**: `mounter.sram1.bin` sha256 `8e60ad24…` (incluye el fix de IRQ del
+  host USB → card reader mode ya no cuelga con un controlador MIDI conectado).
+- **Flasher**: `flasher.sram1.bin` sha256 `fddc1e1a…` (mismo fix de IRQ).
+- **Compilador de patches**: GCC 15.3 **arm64 nativo** (`external/gcc-arm/mac-arm64/`,
+  280 MB, no trackeado). Compile de patch ~3,7 s; "Live" total ~2,7 s.
+- **App**: `Akso.app` 100% arm64 (launcher Packr 2.7.0 compilado a medida, JRE
+  Zulu 11 arm64, `libusb4java.dylib` aarch64 dentro de `Axoloti.jar`).
+- Repo local: `~/Documents/dev/akso`. Fork público: `gus74vv/akso`
+  (`master` = 29 commits adelante de `zrna-research/akso`).
+- Backups: `~/Documents/dev/akso-backups/` (bundle de historia completa +
+  `notes/` con las versiones en español de la documentación).
 
-### Diagnóstico del rompimiento de `32e892e` (layout)
-Se comparó el layout de RAM entre el baseline (`012F09F4`) y `D320170D`:
-- **`.noinit` NO solapa ninguna sección** (verificado con `arm-none-eabi-objdump -h`).
-- **`.ram3` (donde va la memoria del patch) tiene la misma dirección y tamaño en ambos builds** → el exception dump NO empujó ni pisó la memoria del patch.
-- Conclusión: el rompimiento NO es por layout. Queda pendiente: (a) ¿el `.noinit` sobrevive al flash DFU sin ser tocado? (b) ¿el reporte de PC (ping handler) introduce un deadlock en la conexión USB? Ver AGENTS.md para el detalle.
+## Qué anda y qué no
 
-## Próximos pasos (próxima sesión)
-- Reabrir el tema hotplug con los reverts en el historial.
-- Si se re-intenta el exception dump: verificar que el `.noinit` no sea clobbered y que el ping handler no deadlock.
+| Tema | Estado |
+|---|---|
+| App nativa arm64 (sin Rosetta en el camino musical) | OK |
+| MIDI in / MIDI out por USB host (nanoKONTROL2, LEDs) | OK |
+| Card reader mode (masa storage SD) | OK — lectura y escritura verificadas |
+| Card reader con controlador MIDI en el host | OK — fix de IRQ 77 en mounter/flasher |
+| Compilación de patches | OK — arm64 nativo, ~3,7 s |
+| **Hot-plug del controlador** | **PENDIENTE** — cuelga el board (no resetea). Workaround: armar controlador + adaptador y recién ahí conectar; conectar antes de encender la placa. Pistas en `docs/MIDI-USB-HOST-FINDINGS.md` §9 |
+| **SD monta intermitente al arrancar** | PENDIENTE (bug pre-existente). Arrancar un patch la remonta. Intentos que rompieron cosas: seed de `sdcsw_prev`, BKPRAM con `while(BRRDY)` |
+| **Vuelta del card reader mode** | PENDIENTE — expulsar la SD no reconecta el editor (necesita power cycle). Opciones en `docs/CARD-READER-MASS-STORAGE.md` |
+| Patcher con patch live: permite borrar objetos/conexiones | PENDIENTE — diagnóstico + fix propuesto (NO implementado) en `docs/PATCHER-LIVE-LOCK.md` |
+| STM32CubeProgrammer del bundle | 2.4.0/2.5.0 **x86_64** (Rosetta). `dfu-util` descartado para escribir: ver `docs/DFU-WRITE-INCIDENT.md` |
 
-## Toolchain
-- `external/gcc-arm/mac/gcc-arm-none-eabi-8-2019-q3-update/bin` (arm-none-eabi-gcc/objdump).
-- Build firmware: `cd axoloti/firmware && make` (PATH con la toolchain).
-- Build GUI/jar: `cd axoloti && ant`.
+## Build / deploy (resumen operativo)
+
+```sh
+# Firmware (toolchain x86 GCC 8, corre bajo Rosetta). El toolchain no está en el
+# working tree: recuperarlo de la historia del repo.
+git checkout 2937859 -- external/gcc-arm/mac/gcc-arm-none-eabi-8-2019-q3-update
+export PATH="$PWD/external/gcc-arm/mac/gcc-arm-none-eabi-8-2019-q3-update/bin:$PATH"
+cd axoloti/firmware && make            # + (cd mounter && make), (cd flasher && make)
+
+# Jar Java (JDK 11 arm64)
+cd axoloti && JAVA_HOME=../external/jdks/mac_arm64/*/ ant
+zip dist/Axoloti.jar org/usb4java/osx-aarch64/libusb4java.dylib   # ¡re-inyectar la dylib!
+```
+
+**Deploy del firmware: copiar el SET COMPLETO** (`bin` + `elf` + `hex` + `map` +
+`dmp` + `list`) a `<bundle>/Contents/Resources/firmware/build/`, y reiniciar el
+app. Con sólo el `.bin` el patch se linkea contra un `.elf` viejo
+(`--just-symbols`) y crashea al go-live.
+
+## Hardware / recovery
+
+- Para entrar en DFU: **switch 1 apretado al conectar** (bootloader ROM).
+- Rescue: **Board → Flash (rescue)** en el patcher (usa STM32CubeProgrammer).
+  Suele requerir **power cycle sin switch 1** después para que arranque el firmware.
+- Antes de cualquier experimento de flasheo: dump completo del flash + readback
+  + `cmp` (ver `docs/DFU-WRITE-INCIDENT.md`).
+
+## Pendientes técnicos (por orden de interés)
+
+1. Hot-plug del controlador USB host (cuelgue del kernel en la salida del ISR
+   del HCD). Pistas: otras APIs no-ISR-safe en los callbacks del HCD; manejo de
+   connect/disconnect rápido; marcadores en slots separados.
+2. Camino de vuelta del card reader mode (opciones A y B documentadas).
+3. SD monta intermitente al arrancar (entender por qué dejar la SD montada
+   desde el arranque rompe audio/arranque de patches).
+4. STM32CubeProgrammer arm64 nativo en ambos bundles (deadline: macOS 28).
+5. Toolchain de firmware arm64 nativo (port, no drop-in).
+6. Firma/notarización del bundle para distribuirlo sin el warning de Gatekeeper.
