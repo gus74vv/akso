@@ -47,10 +47,13 @@ firmware is ChibiOS/RT + ST's USB host library.
 A full, prioritised list with links and evidence lives in [`TODO.md`](TODO.md).
 Summary:
 
-- **Controller hot-plug can hang the board** — reproducible **only with a
-  USB-C (male) → USB-A (female) adapter attached to the board's host port**.
-  Workaround: assemble controller + adapter *before* connecting, and connect
-  before powering the board on.
+- **Controller hot-plug can hang the board — in one specific configuration.**
+  It hangs if a USB-C (male) → USB-A (female) adapter is left plugged into the
+  **board's** host port (a dangling female socket) and the controller is then
+  plugged into that adapter. If the adapter travels with the **controller's**
+  own cable and the whole assembly is plugged in, hot-plugging works fine.
+  Workaround: keep the adapter on the controller side (or connect everything
+  before powering the board on).
   [`docs/MIDI-USB-HOST-FINDINGS.md`](docs/MIDI-USB-HOST-FINDINGS.md) §9
 - **Deleting objects/nets while a patch is live is not blocked** — diagnosis and
   a ready (unimplemented) one-file fix:

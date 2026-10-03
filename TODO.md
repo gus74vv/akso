@@ -7,16 +7,20 @@ proposed fix.
 
 ---
 
-## 1. Controller hot-plug can hang the board — *medium*
+## 1. Controller hot-plug can hang the board (adapter on the board side) — *medium*
 
-- **Trigger (refined):** reproducible **with a USB-C (male) → USB-A (female)
-  adapter attached to the board's host port**. Without that adapter, hot-plug
-  could not be reproduced.
+- **Trigger (refined):** what matters is **where the USB-C (male) → USB-A
+  (female) adapter sits**, not hot-plugging as such:
+  - adapter **left inserted in the board's** host port (a dangling female
+    socket) and the controller plugged into it afterwards → **hangs**;
+  - adapter attached to the **controller's** cable, then the whole assembly
+    plugged into the board (a normal hot-plug) → **works fine**.
 - **Symptom:** LEDs go dark, the kernel stops scheduling (`USBH_Process` never
   runs again), the CPU stays alive and the host ISR exit is the last step
   reached. No self-recovery.
-- **Workaround:** assemble controller + adapter *before* connecting it to the
-  board, and connect before powering the board on.
+- **Workaround:** keep the adapter on the controller side, i.e. travel with the
+  adapter attached to the controller's cable and plug the assembly into the
+  board (or connect everything before powering the board on).
 - **Already applied:** ISR-safe `osMessagePutI` in the HCD callbacks (correct,
   but not sufficient).
 - **Leads:** other non-ISR-safe calls from the HCD ISR, fast connect/disconnect

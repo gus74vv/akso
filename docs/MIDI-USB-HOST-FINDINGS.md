@@ -14,9 +14,11 @@ done.
 
 - **MIDI out → nanoKONTROL2 LEDs: SOLVED** (verified on hardware). One-line fix,
   see §5.
-- **Controller hot-plug: NOT solved**, but there is a **workaround** (§9).
-  Reproducible **only with the USB-C(male)→USB-A(female) adapter attached to the
-  board's host port** (refinement of 2026-10-03).
+- **Controller hot-plug: NOT solved**, but there is a **workaround** (§9). It only
+  hangs in one configuration: the USB-C(male)→USB-A(female) adapter left inserted
+  in the **board's** host port, with the controller plugged into it afterwards.
+  With the adapter on the **controller's** cable, hot-plug works (refinement of
+  2026-10-03).
 - **Firmware deploy**: the **full set** must be copied, not just the `.bin`
   (§1) — this was the actual cause of a go-live crash.
 - Reference baseline: **`012F09F4`** (reproducible bit-for-bit, §2).
@@ -219,19 +221,23 @@ to be re-enumerated or power cycled). The app shows
   after `HAL_HCD_IRQHandler`); the state machine (`USBH_Process`) **never runs
   again** → something leaves the kernel blocked inside/while exiting the ISR.
 
-**TRIGGER (VERIFIED) — it is the "dirty" connection, not a clean hot-plug:**
-- USB-C→USB-A **adapter already plugged** into AKSO + inserting the controller's
-  USB-A cable into the adapter → **hangs**.
-- Assemble everything (controller + adapter) and **then** plug it into AKSO →
-  **does not hang**.
+**TRIGGER (VERIFIED) — what matters is where the adapter sits, not hot-plugging per se:**
+- Adapter (USB-C male → USB-A female) **left inserted in the board's host port**
+  (a dangling female socket), then the controller's USB-A cable plugged into that
+  adapter → **hangs**.
+- Adapter **attached to the controller's cable**, then the whole assembly plugged
+  into the board → **fine**, no hang (even with the board already running).
 
-**Refinement (2026-10-03):** the hang is reproducible **only when that adapter is
-present** on the board's host port; hot-plugging a USB-A device directly (no
-adapter) could not be reproduced. So the adapter itself (its connect/disconnect
-signalling, or the extra contact bounce it introduces) is part of the trigger.
+**Refinement (2026-10-03):** hot-plugging the controller is safe as long as the
+adapter travels with the controller's cable. What hangs the board is connecting
+into an adapter that is **already sitting in the board's port**, i.e. the board
+gets a connect event on a port whose mechanical/electrical state changed earlier
+(when the adapter was inserted). So the relevant variable is the board-side
+dangling socket, not the act of hot-plugging a device.
 
-**Workaround (decision of 2026-09-30):** assemble controller + adapter first and
-only then connect it to AKSO (and connect before powering the board).
+**Workaround (decision of 2026-09-30):** keep the adapter on the controller side
+(adapter attached to the controller's cable, then plug the assembly into AKSO),
+or connect everything before powering the board on.
 
 **Fix applied — `osMessagePutI` (correct, but NOT sufficient):**
 in `external/STM32_USB_Host_Library/Core/Src/usbh_core.c`,
