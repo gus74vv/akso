@@ -17,7 +17,7 @@ Everything here was verified on real hardware.
 
 | | |
 |---|---|
-| Board firmware | **CRC32 `05394BAC`** (chip flashed and validated) |
+| Board firmware | **CRC32 `7072DEBF`** (chip flashed and validated) |
 | macOS app | **Native arm64**: launcher, bundled JRE, usb4java, patch compiler |
 | MIDI | USB host in **and out** working (tested with a KORG nanoKONTROL2) |
 | Card reader | USB mass storage (SD) readable and writable, `fsck`-clean |

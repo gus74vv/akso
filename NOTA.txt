@@ -17,7 +17,7 @@
   Zulu 11 arm64, `libusb4java.dylib` aarch64 dentro de `Axoloti.jar`).
 - Repo local: `~/Documents/dev/akso`. Fork público: `gus74vv/akso`
   (`master` = 30 commits adelante de `zrna-research/akso`, release
-  `v3.0.1-arm64` con la app + el firmware).
+  `v3.0.2-arm64` con la app + el firmware).
 - Backups: `~/Documents/dev/akso-backups/` (bundle de historia completa +
   `notes/` con las versiones en español de la documentación).
 

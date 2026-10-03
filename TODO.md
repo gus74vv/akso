@@ -94,7 +94,7 @@ proposed fix.
   maintainer cannot reproduce or fix those builds — it is up to whoever has the
   platform to validate and share the outcome.
 - Nice-to-have while doing it: record the produced `axoloti.bin` CRC32 and note
-  whether it matches the macOS build (`05394BAC`) — a different CRC is fine, but
+  whether it matches the macOS build (`7072DEBF`) — a different CRC is fine, but
   the `.bin`/`.elf` pair must always match within your own build.
 
 ## 8. USB host MIDI: instance 0 is hardcoded (latent, not reachable today) - *low*

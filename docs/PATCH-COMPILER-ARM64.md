@@ -14,7 +14,7 @@
 
 **The board firmware is untouched, and so is the `axoloti.elf` the patch links
 against (`--just-symbols`) → no reflashing needed.** The firmware stays the
-same (**CRC 05394BAC**, the "Local firmware CRC" the app reports).
+same (**CRC 7072DEBF**, the "Local firmware CRC" the app reports).
 
 ## Why: patch compilation happens on the Mac, not on the AKSO
 
