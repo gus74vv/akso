@@ -97,8 +97,20 @@ proposed fix.
   whether it matches the macOS build (`05394BAC`) — a different CRC is fine, but
   the `.bin`/`.elf` pair must always match within your own build.
 
----
+## 8. USB host MIDI: instance 0 is hardcoded (latent, not reachable today) - *low*
 
+- `USBH_MIDI_ProcessOutput` always drains `&USBHMIDIC[0].out_buffer`, and
+  enumeration fills instance 0 only. With a single host controller that is
+  coherent: the "usb host port 2..4" entries of the object menu are silent
+  no-ops ([`docs/MIDI-USB-HOST-FINDINGS.md`](docs/MIDI-USB-HOST-FINDINGS.md) section 8).
+- **What it would break:** if a second host instance were ever added (a second
+  OTG controller in host mode, or per-device handles with hub support), MIDI
+  output addressed to that instance would be buffered but never drained, giving a
+  permanent `midi output overflow`. The fix then is to derive the instance in
+  `USBH_MIDI_ProcessOutput` instead of hardcoding index 0.
+- Not worth touching while the hardware exposes a single host port.
+
+---
 ## Closed / not reproducing
 
 - **"SD card mounts intermittently at boot"** (recorded 2026-09-28): as of

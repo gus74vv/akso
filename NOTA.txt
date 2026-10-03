@@ -31,6 +31,7 @@
 | Card reader con controlador MIDI en el host | OK — fix de IRQ 77 en mounter/flasher |
 | **SD monta al arrancar** | **OK** — monta normalmente (el comportamiento intermitente del 28/09 no se reproduce; queda como historia en `docs/MICROSD-DIAGNOSTICS.md`) |
 | Compilación de patches | OK — arm64 nativo, ~3,7 s |
+| MIDI out del USB host con muchos LEDs (32 `cc thin`) | **OK** — fix de caudal (16 eventos por transferencia + ring 128), fwid `7072DEBF`, verificado: LED verde fijo y sin mensajes de overflow |
 | **Hot-plug del controlador** | PENDIENTE, y **depende de dónde esté el adaptador**: si el adaptador USB-C macho → USB-A hembra queda **insertado en el puerto host del board** (socket hembra colgando) y después le enchufás el controlador → **cuelga**. Si el adaptador viaja **en el cable del controlador** y conectás el conjunto → hot-plug **OK**. Workaround: dejar el adaptador del lado del controlador. Pistas en `docs/MIDI-USB-HOST-FINDINGS.md` §9 |
 | **Vuelta del card reader mode** | PENDIENTE pero **heredado**: le pasa igual al Axoloti original → no es regresión y **no es prioridad**. Opciones en `docs/CARD-READER-MASS-STORAGE.md` |
 | Patcher con patch live: permite borrar objetos/conexiones | **TODO** — diagnóstico + fix propuesto (NO implementado) en `docs/PATCHER-LIVE-LOCK.md`, listado en `TODO.md` |

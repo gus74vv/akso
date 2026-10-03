@@ -206,6 +206,19 @@ are truncated** in the console.
 
 ---
 
+- **USB host MIDI ports 2-4 are inert.** The object menu offers "usb host
+  port 1..4" because the `.axo` defines four entries, but this board has a single
+  host controller and the firmware keeps a single `USBH_HandleTypeDef`
+  (`hUSBHost`). Enumeration fills instance 0 only
+  (`USBHMIDIC[0].in_mapping->nports = ...` in `usbh_midi_core.c`) and the output
+  drain in `USBH_MIDI_ProcessOutput` always reads `&USBHMIDIC[0].out_buffer`, so
+  `midi_outputmap_usbh2` stays `nports = 0` ("not connected"). Selecting port 2+
+  in an object is therefore a **silent no-op** — the message is dropped in
+  `MidiSendVirtual`'s routing loop, not buffered, so it does *not* produce
+  overflow. The hardcoded instance 0 in the drain is a latent issue: it would
+  break output for a second instance if one were ever added (a second OTG
+  controller in host mode, or per-device handles with hub support).
+
 ## 9. OPEN — controller hot-plug hangs the board (no reset)
 
 **Symptom (VERIFIED):** hot-plugging the nanoKONTROL2 makes the board **hang**:
