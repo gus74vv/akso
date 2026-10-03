@@ -174,6 +174,12 @@ Notes:
 - Fix **8** (patcher objref error) and **9** (drag sensitivity) are **Java** and
   are platform independent.
 
+Step-by-step recipes for **macOS Intel, Windows and Linux** are in
+[`docs/BUILD-OTHER-PLATFORMS.md`](docs/BUILD-OTHER-PLATFORMS.md) — including a
+cherry-pick list if you only want the fixes in an existing tree. That document
+is explicitly **marked as unvalidated**: only macOS Apple Silicon was verified
+end to end here.
+
 ---
 
 ## Repository layout
