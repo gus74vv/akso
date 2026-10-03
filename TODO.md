@@ -72,6 +72,28 @@ proposed fix.
 - If it ever matters, ad-hoc signing (`codesign --force --deep -s - Akso.app`)
   is free and removes part of the friction.
 
+## 7. Validate the cross-platform build guide — *open to contributors*
+
+- [`docs/BUILD-OTHER-PLATFORMS.md`](docs/BUILD-OTHER-PLATFORMS.md) documents how to
+  build this fork on **macOS Intel, Windows and Linux**, but it is explicitly
+  **UNVALIDATED**: only macOS Apple Silicon was verified end to end (there is no
+  Mac Intel, Windows or Linux machine behind this fork, and no one has run the
+  recipes yet).
+- The fixes themselves are platform independent (C firmware + Java), so this is
+  about *build/package* instructions, not about the fixes working.
+- **What is needed:** someone on each platform to follow the guide and report
+  back. **Definition of done** per platform: `make package-<platform>` produces a
+  bundle that launches, connects to the board, compiles a patch and flashes a
+  firmware update.
+- **How to contribute:** open an issue at
+  <https://github.com/gus74vv/akso/issues> with OS + version, architecture, the
+  exact commands, the full output of any failing step and the commit built.
+  Instructions that turn out to be wrong will be fixed, and the platform will be
+  marked as validated (or dropped from the document).
+- Nice-to-have while doing it: record the produced `axoloti.bin` CRC32 and note
+  whether it matches the macOS build (`05394BAC`) — a different CRC is fine, but
+  the `.bin`/`.elf` pair must always match within your own build.
+
 ---
 
 ## Closed / not reproducing
