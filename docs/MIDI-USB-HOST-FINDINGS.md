@@ -307,3 +307,9 @@ means the aggregate producer rate exceeds the drain, while an isolated burst
 means the ring buffer is too small. A per-second count of puts / drops / sends
 from `sysmon` is an easy probe (that instrumentation was used to diagnose this
 case and is intentionally not part of `master`).
+
+
+**Verified on hardware (2026-10-03):** with the same patch (32 `midi/out/cc thin`
+objects driving the nanoKONTROL2 LEDs), the patcher console no longer prints any
+`midi output overflow` line and the board LED stays solid green. Firmware CRC32
+`7072DEBF` (1,211,744 bytes).

@@ -6,7 +6,7 @@
 
 ## Estado actual
 
-- **Firmware de la placa: fwid `05394BAC`** (CRC32 de `axoloti.bin`, 1210976 B).
+- **Firmware de la placa: fwid `7072DEBF`** (fix de caudal MIDI out del USB host: drena 16 eventos por transferencia y ring buffer 128; antes `05394BAC`). CRC32 de `axoloti.bin`, 1211744 B.
   Coincide con el que embebe `Akso.app` ("Local firmware CRC").
 - **Mounter**: `mounter.sram1.bin` sha256 `8e60ad24…` (incluye el fix de IRQ del
   host USB → card reader mode ya no cuelga con un controlador MIDI conectado).
