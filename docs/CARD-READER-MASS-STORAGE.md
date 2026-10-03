@@ -158,7 +158,12 @@ not change.
 **Validated on hardware (2026-10-01):** with the MIDI controller on the host
 port, card reader mode mounts the SD card and the board no longer hangs.
 
-## Known pending issue — there is no way back from card reader mode
+## Known pending issue — there is no way back from card reader mode *(inherited from upstream, deferred)*
+
+> **Status (2026-10-03):** the original Axoloti/Akso behaves the same way, so this
+> is **not a regression of this fork** and it is **not a priority** to fix. It is
+> documented here for whoever picks it up (and because the patcher message is
+> misleading).
 
 **Symptom:** ejecting the SD card from macOS leaves the mounter running (LED
 blinking) and the patcher never reconnects

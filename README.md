@@ -44,33 +44,39 @@ firmware is ChibiOS/RT + ST's USB host library.
 
 ### Known open issues
 
-- **SD card mounts intermittently at boot.** `sysmon` samples `SDCSW`
-  (GPIOD13), which reads 1 on many power-ups, and unmounts the card; starting a
-  patch remounts it. Attempts to force it (seeding `sdcsw_prev`, enabling
-  BKPRAM) either broke patch boot/audio or hung the boot — they were reverted.
-- **Hot-plugging a USB host controller can hang the board.** Workaround:
-  assemble controller + adapter *before* connecting to AKSO (and connect before
-  powering the board). See [`docs/MIDI-USB-HOST-FINDINGS.md`](docs/MIDI-USB-HOST-FINDINGS.md) §9 for the leads.
-- **Ejecting the SD in card reader mode does not return to the editor** (the
-  mounter keeps running; a power cycle is needed). Two implementation options
-  are described at the end of [`docs/CARD-READER-MASS-STORAGE.md`](docs/CARD-READER-MASS-STORAGE.md).
-- **Deleting objects/nets while a patch is live is not blocked.** The editor's
-  live lock ignores every delete path (keyboard, menu, cut, iolet context menu,
-  cable drag). Diagnosis and a surgical 1-file fix are ready but **not
-  implemented**: [`docs/PATCHER-LIVE-LOCK.md`](docs/PATCHER-LIVE-LOCK.md).
-- The bundled `STM32CubeProgrammer` CLI (used by "Board → Flash (rescue)") is
-  **2.4.0/2.5.0 x86_64** and runs under Rosetta. `dfu-util` was evaluated as an
-  arm64 replacement and is **disqualified for writing** on this ROM bootloader:
-  it erases and then dies before the first data byte
-  ([`docs/DFU-WRITE-INCIDENT.md`](docs/DFU-WRITE-INCIDENT.md), including the
-  recovery procedure and the flash-safety discipline).
+A full, prioritised list with links and evidence lives in [`TODO.md`](TODO.md).
+Summary:
+
+- **Controller hot-plug can hang the board** — reproducible **only with a
+  USB-C (male) → USB-A (female) adapter attached to the board's host port**.
+  Workaround: assemble controller + adapter *before* connecting, and connect
+  before powering the board on.
+  [`docs/MIDI-USB-HOST-FINDINGS.md`](docs/MIDI-USB-HOST-FINDINGS.md) §9
+- **Deleting objects/nets while a patch is live is not blocked** — diagnosis and
+  a ready (unimplemented) one-file fix:
+  [`docs/PATCHER-LIVE-LOCK.md`](docs/PATCHER-LIVE-LOCK.md)
+- **Rescue flashing still needs Rosetta** — the bundled STM32CubeProgrammer CLI
+  is 2.4.0/2.5.0 x86_64, and `dfu-util` was evaluated and **disqualified for
+  writing**: [`docs/DFU-WRITE-INCIDENT.md`](docs/DFU-WRITE-INCIDENT.md)
+- **The firmware toolchain is still x86** (Rosetta); the patch compiler is
+  already native arm64
+- **No way back from card reader mode after ejecting** — same behaviour as the
+  original Axoloti, inherited, low priority
+
+**Not reproducing:** the "SD card mounts intermittently at boot" issue — the
+card now mounts normally (kept as history in
+[`docs/MICROSD-DIAGNOSTICS.md`](docs/MICROSD-DIAGNOSTICS.md)).
+
+**Out of scope:** code signing / notarization (needs a paid Apple Developer
+account). Use the `xattr` command below.
 
 ---
 
 ## Install on macOS (Apple Silicon)
 
 1. Download the release archive and move `Akso.app` to `/Applications`.
-2. The app is **not notarized** (no paid Developer ID). Remove the quarantine
+2. The app is **not notarized** (the release is free and ad-free by design —
+   notarization would need a paid Apple Developer account). Remove the quarantine
    flag once, or right-click → *Open*:
 
    ```sh
@@ -78,7 +84,7 @@ firmware is ChibiOS/RT + ST's USB host library.
    ```
 
 3. Connect the board over USB. If the app asks to update the firmware, accept —
-   it uses the DFU bootloader (STM32CubeProgrammer / `dfu-util`).
+   it uses the DFU bootloader through the bundled STM32CubeProgrammer CLI.
 4. If the board ever looks dead, it can always be recovered: hold **switch 1**
    while plugging it in (DFU mode) and use **Board → Flash (rescue)**.
 

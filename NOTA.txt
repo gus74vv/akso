@@ -1,7 +1,8 @@
 # Proyecto AKSO (STM32H753) — nota interna
 
 > Estado al 2026-10-03. Este archivo queda a propósito **en español**: es mi nota
-> de trabajo. La documentación publicada (en inglés) está en `docs/`.
+> de trabajo. La documentación publicada (en inglés) está en `docs/` y los
+> pendientes en `TODO.md`.
 
 ## Estado actual
 
@@ -15,11 +16,12 @@
 - **App**: `Akso.app` 100% arm64 (launcher Packr 2.7.0 compilado a medida, JRE
   Zulu 11 arm64, `libusb4java.dylib` aarch64 dentro de `Axoloti.jar`).
 - Repo local: `~/Documents/dev/akso`. Fork público: `gus74vv/akso`
-  (`master` = 29 commits adelante de `zrna-research/akso`).
+  (`master` = 30 commits adelante de `zrna-research/akso`, release
+  `v3.0.1-arm64` con la app + el firmware).
 - Backups: `~/Documents/dev/akso-backups/` (bundle de historia completa +
   `notes/` con las versiones en español de la documentación).
 
-## Qué anda y qué no
+## Qué anda y qué no (revisado al 2026-10-03)
 
 | Tema | Estado |
 |---|---|
@@ -27,12 +29,14 @@
 | MIDI in / MIDI out por USB host (nanoKONTROL2, LEDs) | OK |
 | Card reader mode (masa storage SD) | OK — lectura y escritura verificadas |
 | Card reader con controlador MIDI en el host | OK — fix de IRQ 77 en mounter/flasher |
+| **SD monta al arrancar** | **OK** — monta normalmente (el comportamiento intermitente del 28/09 no se reproduce; queda como historia en `docs/MICROSD-DIAGNOSTICS.md`) |
 | Compilación de patches | OK — arm64 nativo, ~3,7 s |
-| **Hot-plug del controlador** | **PENDIENTE** — cuelga el board (no resetea). Workaround: armar controlador + adaptador y recién ahí conectar; conectar antes de encender la placa. Pistas en `docs/MIDI-USB-HOST-FINDINGS.md` §9 |
-| **SD monta intermitente al arrancar** | PENDIENTE (bug pre-existente). Arrancar un patch la remonta. Intentos que rompieron cosas: seed de `sdcsw_prev`, BKPRAM con `while(BRRDY)` |
-| **Vuelta del card reader mode** | PENDIENTE — expulsar la SD no reconecta el editor (necesita power cycle). Opciones en `docs/CARD-READER-MASS-STORAGE.md` |
-| Patcher con patch live: permite borrar objetos/conexiones | PENDIENTE — diagnóstico + fix propuesto (NO implementado) en `docs/PATCHER-LIVE-LOCK.md` |
-| STM32CubeProgrammer del bundle | 2.4.0/2.5.0 **x86_64** (Rosetta). `dfu-util` descartado para escribir: ver `docs/DFU-WRITE-INCIDENT.md` |
+| **Hot-plug del controlador** | PENDIENTE, pero **sólo con el adaptador USB-C macho → USB-A hembra puesto en el puerto host del board**. Sin adaptador no se reproduce. Workaround: armar controlador + adaptador y recién ahí conectar (y conectar antes de encender la placa). Pistas en `docs/MIDI-USB-HOST-FINDINGS.md` §9 |
+| **Vuelta del card reader mode** | PENDIENTE pero **heredado**: le pasa igual al Axoloti original → no es regresión y **no es prioridad**. Opciones en `docs/CARD-READER-MASS-STORAGE.md` |
+| Patcher con patch live: permite borrar objetos/conexiones | **TODO** — diagnóstico + fix propuesto (NO implementado) en `docs/PATCHER-LIVE-LOCK.md`, listado en `TODO.md` |
+| STM32CubeProgrammer del bundle | **TODO** — 2.4.0/2.5.0 **x86_64** (Rosetta); migrar a la 2.23 ARM-aarch64 antes de macOS 28. `dfu-util` descartado para escribir: `docs/DFU-WRITE-INCIDENT.md` |
+| Toolchain de firmware x86 (Rosetta) | **TODO** (port, no drop-in): ARM GNU Toolchain darwin-arm64 o build en Linux/CI |
+| Firma / notarización del bundle | **FUERA DE ALCANCE** (no voy a pagar Apple Developer). Los usuarios usan `xattr -dr com.apple.quarantine` |
 
 ## Build / deploy (resumen operativo)
 
@@ -61,14 +65,13 @@ app. Con sólo el `.bin` el patch se linkea contra un `.elf` viejo
 - Antes de cualquier experimento de flasheo: dump completo del flash + readback
   + `cmp` (ver `docs/DFU-WRITE-INCIDENT.md`).
 
-## Pendientes técnicos (por orden de interés)
+## Pendientes técnicos (detalle en `TODO.md`)
 
-1. Hot-plug del controlador USB host (cuelgue del kernel en la salida del ISR
+1. Hot-plug con adaptador USB-C→USB-A (cuelgue del kernel en la salida del ISR
    del HCD). Pistas: otras APIs no-ISR-safe en los callbacks del HCD; manejo de
    connect/disconnect rápido; marcadores en slots separados.
-2. Camino de vuelta del card reader mode (opciones A y B documentadas).
-3. SD monta intermitente al arrancar (entender por qué dejar la SD montada
-   desde el arranque rompe audio/arranque de patches).
-4. STM32CubeProgrammer arm64 nativo en ambos bundles (deadline: macOS 28).
-5. Toolchain de firmware arm64 nativo (port, no drop-in).
-6. Firma/notarización del bundle para distribuirlo sin el warning de Gatekeeper.
+2. Live-lock del patcher (borrados con patch live) — fix listo, sin implementar.
+3. STM32CubeProgrammer 2.23 ARM-aarch64 en ambos bundles (deadline macOS 28).
+4. Toolchain de firmware arm64 nativo (port).
+5. Vuelta del card reader mode — heredado, baja prioridad.
+6. Firma/notarización — fuera de alcance.

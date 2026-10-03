@@ -86,9 +86,13 @@ sudo dd if=/dev/zero of=/dev/disk4 bs=1M count=4 oflag=sync   # ~120 KB/s
   `fsck_msdos -n` exit 0, and a raw write test with an open fd (4 patterns over
   4 LBAs, no contamination, restored correctly).
 
-## Related open issue — SD mounts intermittently at boot
+## SD mount at boot — previously intermittent, not reproducing (2026-10-03 update)
 
-The main firmware mounts the SD card **intermittently** at boot: `sysmon` reads
+> **Update (2026-10-03):** on current builds the SD card **mounts normally**; the
+> intermittent behaviour recorded below is **not reproducing**. Kept as history
+> in case it reappears.
+
+The main firmware used to mount the SD card **intermittently** at boot: `sysmon` reads
 `SDCSW` (GPIOD13), which reads 1 on many AKSO power-ups, interprets it as
 "removed" and unmounts the card. When that happens, starting a patch remounts it
 (`StartPatch1` → `sdcard_attemptMountIfUnmounted`). Known failed attempts:

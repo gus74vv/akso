@@ -15,6 +15,8 @@ done.
 - **MIDI out → nanoKONTROL2 LEDs: SOLVED** (verified on hardware). One-line fix,
   see §5.
 - **Controller hot-plug: NOT solved**, but there is a **workaround** (§9).
+  Reproducible **only with the USB-C(male)→USB-A(female) adapter attached to the
+  board's host port** (refinement of 2026-10-03).
 - **Firmware deploy**: the **full set** must be copied, not just the `.bin`
   (§1) — this was the actual cause of a go-live crash.
 - Reference baseline: **`012F09F4`** (reproducible bit-for-bit, §2).
@@ -222,6 +224,11 @@ to be re-enumerated or power cycled). The app shows
   USB-A cable into the adapter → **hangs**.
 - Assemble everything (controller + adapter) and **then** plug it into AKSO →
   **does not hang**.
+
+**Refinement (2026-10-03):** the hang is reproducible **only when that adapter is
+present** on the board's host port; hot-plugging a USB-A device directly (no
+adapter) could not be reproduced. So the adapter itself (its connect/disconnect
+signalling, or the extra contact bounce it introduces) is part of the trigger.
 
 **Workaround (decision of 2026-09-30):** assemble controller + adapter first and
 only then connect it to AKSO (and connect before powering the board).
