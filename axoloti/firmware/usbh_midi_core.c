@@ -402,11 +402,14 @@ USBH_StatusTypeDef USBH_MIDI_ProcessOutput(USBH_HandleTypeDef *phost) {
                 USBH_ErrLog("USB Host Output(SD) ERROR");
                 USBH_ClrFeature(phost, MIDI_Handle->OutEp);
             }
-            static midi_message_t outbuf[4] __attribute__((section(".ram3"))) __attribute__((aligned(32)));
+            /* up to 16 USB-MIDI events = 64 bytes = one full bulk packet per transfer
+			   (was 4 events; draining more per transfer raises the USB host MIDI out
+			   throughput and absorbs bursts that used to overflow the ring buffer) */
+			static midi_message_t outbuf[16] __attribute__((section(".ram3"))) __attribute__((aligned(32)));
 			midi_message_t *m = &outbuf[0];
 			int s;
 			midi_output_buffer_t *b = &USBHMIDIC[0].out_buffer;
-			for(s=0;s<4;s++) {
+			for(s=0;s<16;s++) {
 					msg_t r = midi_output_buffer_get(b, m);
 					if (r!=0) break;
 					m++;

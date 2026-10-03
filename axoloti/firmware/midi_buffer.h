@@ -17,7 +17,7 @@
  */
 #ifndef MIDI_BUFFER_H
 
-#define MIDI_RING_BUFFER_SIZE 32
+#define MIDI_RING_BUFFER_SIZE 128
 
 #include "ch.h"
 

@@ -270,3 +270,40 @@ another cause.
   Moving it to `.ram3` (NOINIT) and enabling register reporting was tried: it
   worked as a diagnostic and was not kept. (A `.noinit`/BKPRAM region with an
   unbounded `while` **hangs the boot**; use a bounded timeout.)
+
+---
+
+## 10. USB host MIDI out throughput — 4 to 16 events per bulk transfer (2026-10-03)
+
+**Symptom (LED-heavy patch):** with 32 `midi/out/cc thin` objects sending to
+"usb host port 1" (a nanoKONTROL2 used as an LED surface), the patcher console
+printed `midi output overflow` continuously: two or three lines at patch start,
+then roughly one per MIDI message, and a flood when a recording finished.
+
+**Cause:** the output ring buffer holds `MIDI_RING_BUFFER_SIZE` messages (it was
+32, i.e. 31 usable), and `USBH_MIDI_ProcessOutput` drained at most **4 events per
+bulk transfer** (`outbuf[4]` = 16 bytes), one transfer at a time, paced by the
+host state machine (SOF / URB-completion events). `cc thin` throttles to one
+message per 31 k-rate ticks (~10.3 ms at the 3 kHz k-rate), so each object can
+emit up to ~97 msg/s and 32 objects can demand ~3,100 msg/s — well above what the
+drain delivered. On top of that, the ring was small enough that a single burst of
+more than 31 LED updates (e.g. all loopers changing state when a recording ends)
+overflowed it even at low average rates.
+
+**Fix:**
+
+- `usbh_midi_core.c`: drain up to **16 events (64 bytes = one full bulk packet)**
+  per transfer instead of 4.
+- `midi_buffer.h`: `MIDI_RING_BUFFER_SIZE` **32 -> 128**, so bursts are absorbed
+  instead of dropped (LED updates degrade into latency rather than loss).
+
+Firmware CRC32 with this fix: **`7072DEBF`**.
+
+**Diagnosing this class of problem:** the report comes from
+`midi_output_buffer_put()` in `midi_buffer.c` through
+`report_usbh_midi_ringbuffer_overflow()`. Dropping on a full buffer is by design
+(non-blocking put) and each dropped message logs one line, so a *steady* stream
+means the aggregate producer rate exceeds the drain, while an isolated burst
+means the ring buffer is too small. A per-second count of puts / drops / sends
+from `sysmon` is an easy probe (that instrumentation was used to diagnose this
+case and is intentionally not part of `master`).
