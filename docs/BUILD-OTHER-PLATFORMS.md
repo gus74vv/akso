@@ -58,6 +58,7 @@ Net-effect commits worth cherry-picking (current hashes):
 | Case-colliding duplicate source file (breaks case-insensitive filesystems) | `485f51d` | deletes `external/CMSIS/DSP_Lib/Source/TransformFunctions/arm_bitreversal2.S` (the Makefile uses the lowercase `.s`, so case-sensitive systems are unaffected) |
 | Patcher: clear error for an unassigned `objref` | `a453508` | `axoloti/src/main/java/axoloti/patch/object/attribute/AttributeInstanceObjRef.java` |
 | Patcher: objref in polyphonic voices (`play`/`tabrecord2~` inside `patcher/voice`) | `d592654` | `axoloti/src/main/java/axoloti/patch/object/attribute/AttributeInstanceObjRef.java` + `axoloti/src/main/java/axoloti/codegen/patch/PatchViewCodegen.java` |
+| Patcher: objref inside a **normal** subpatcher (`../` to an object in the enclosing patch) | `3b5dcef` | `axoloti/src/main/java/axoloti/codegen/patch/object/AxoObjectInstanceCodegenView.java` + `axoloti/src/main/java/axoloti/codegen/patch/PatchViewCodegen.java` |
 | Patcher UI: configurable drag sensitivity | `cb13592` | 5 files under `axoloti/src/main/java/axoloti/swingui/` + `preferences/` |
 | macOS arm64 only (launcher/JRE/dylib) | `b534e61`, `367005d` | `Makefile.patch`, `packr-mac-arm64.json`, `external/jdks/mac_arm64/` |
 
@@ -65,7 +66,7 @@ Net-effect commits worth cherry-picking (current hashes):
 # example: only the firmware-side fixes
 git cherry-pick af86cbe 75e42b8 3b17fbe ea42606 b146df6 58f1abd 485f51d
 # and for the patcher
-git cherry-pick a453508 cb13592 d592654
+git cherry-pick a453508 cb13592 d592654 3b5dcef
 ```
 
 > **Critical pairing rule:** patches are compiled and linked against

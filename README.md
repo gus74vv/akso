@@ -42,6 +42,7 @@ firmware is ChibiOS/RT + ST's USB host library.
 | 8 | Patcher | Compiling a patch with an unassigned `objref` (e.g. `table/load` without a target) produced 7 cryptic `SEVERAL incomplete object reference attribute` lines plus a C++ error | The log now names the object, its type and the attribute | commit `Improve empty object-reference attribute error` |
 | 9 | UI | Knobs/sliders were hyper-sensitive to click+drag | Configurable **File → Preferences → Drag sensitivity** (0.05–1.0) | — |
 | 10 | Patch compiler | Objects with `objref` (`play`, `tabrecord2~`, etc.) inside a `patcher/voice` crashed the C++ compiler: `'class …voice' has no member named 'parent'` | Two changes in the Java codegen: (a) use `parent->common->` instead of `parent->parent->` for the first `../` inside a polyphonic voice; (b) store a `rootc *parent` back-pointer in the polyphonic patcher class so the chain `voice→common→parent→root` works | [`docs/OBJREF-POLYPHONIC-VOICE.md`](docs/OBJREF-POLYPHONIC-VOICE.md) |
+| 11 | Patch compiler | Objects with `objref` inside a **normal** (`patcher`) subpatcher crashed the C++ compiler: `'class rootc::instancepatcher__N' has no member named 'parent'` | Generic back-pointer in the Java codegen: every patcher instance (any mode, any nesting depth) now emits a `<EnclosingClass> *parent` member and sets it in `Init()` | [`docs/OBJREF-NORMAL-SUBPATCH.md`](docs/OBJREF-NORMAL-SUBPATCH.md) |
 
 ### Known open issues
 
@@ -175,8 +176,9 @@ Notes:
 - Fixes **3–7** (card reader D-cache, mounter IRQ, USB host MIDI, ISR-safe
   message posting) are in **C firmware** and apply to every platform that runs
   this firmware.
-- Fixes **8** (patcher objref error), **9** (drag sensitivity) and **10** (objref
-  across polyphonic voices) are **Java** and are platform independent.
+- Fixes **8** (patcher objref error), **9** (drag sensitivity), **10** (objref
+  across polyphonic voices) and **11** (objref across normal subpatchers) are **Java**
+  and are platform independent.
 
 Step-by-step recipes for **macOS Intel, Windows and Linux** are in
 [`docs/BUILD-OTHER-PLATFORMS.md`](docs/BUILD-OTHER-PLATFORMS.md) — including a

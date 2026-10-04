@@ -112,6 +112,14 @@ This makes `parent->common->parent->instancet_i` resolve correctly:
 - `parent->common->parent` = `rootc*` (the root patcher)
 - `parent->common->parent->instancet_i` = the table in the root
 
+> **Update (`3b5dcef`):** the back-pointer is no longer declared in
+> `generatePolyCode()`. It is now emitted generically by
+> `AxoObjectInstanceCodegenView.generateClass()` / `generateInitCodePlusPlus()`
+> for **every** patcher instance, typed with the real enclosing class — see
+> [`OBJREF-NORMAL-SUBPATCH.md`](OBJREF-NORMAL-SUBPATCH.md). The
+> `AttributeInstanceObjRef` change below (the `parent->common->` rewrite) is
+> unchanged.
+
 ---
 
 ## Files changed
@@ -119,7 +127,7 @@ This makes `parent->common->parent->instancet_i` resolve correctly:
 | File | Change |
 |---|---|
 | `axoloti/src/main/java/axoloti/patch/object/attribute/AttributeInstanceObjRef.java` | Activate the polyphonic FIXME in `CValue()` |
-| `axoloti/src/main/java/axoloti/codegen/patch/PatchViewCodegen.java` | Add `rootc *parent` field + init assignment in `generatePolyCode()` |
+| `axoloti/src/main/java/axoloti/codegen/patch/PatchViewCodegen.java` | Add `rootc *parent` field + init assignment in `generatePolyCode()` (generalised in `3b5dcef`, see below) |
 
 Both are **Java** — only `Axoloti.jar` needs to be rebuilt (no firmware
 flash required).
