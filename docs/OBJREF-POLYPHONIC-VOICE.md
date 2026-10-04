@@ -60,7 +60,7 @@ It was never activated.
 
 ### 2. No back-link from the polyphonic patcher to the root
 
-Even after fixing problem #1, the generated expression
+Even after fixing problem 1, the generated expression
 `parent->common->parent->instancet_i` failed because the polyphonic
 patcher class (`instancepatcher__1`) itself has no `parent` member.
 
