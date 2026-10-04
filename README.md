@@ -41,6 +41,7 @@ firmware is ChibiOS/RT + ST's USB host library.
 | 7 | USB host (kernel) | HCD ISR callbacks used `osMessagePut` (mapped to non-ISR-safe `chEvtSignal`), corrupting the ChibiOS kernel lock | Use the ISR-safe `osMessagePutI` | same doc §9 |
 | 8 | Patcher | Compiling a patch with an unassigned `objref` (e.g. `table/load` without a target) produced 7 cryptic `SEVERAL incomplete object reference attribute` lines plus a C++ error | The log now names the object, its type and the attribute | commit `Improve empty object-reference attribute error` |
 | 9 | UI | Knobs/sliders were hyper-sensitive to click+drag | Configurable **File → Preferences → Drag sensitivity** (0.05–1.0) | — |
+| 10 | Patch compiler | Objects with `objref` (`play`, `tabrecord2~`, etc.) inside a `patcher/voice` crashed the C++ compiler: `'class …voice' has no member named 'parent'` | Two changes in the Java codegen: (a) use `parent->common->` instead of `parent->parent->` for the first `../` inside a polyphonic voice; (b) store a `rootc *parent` back-pointer in the polyphonic patcher class so the chain `voice→common→parent→root` works | [`docs/OBJREF-POLYPHONIC-VOICE.md`](docs/OBJREF-POLYPHONIC-VOICE.md) |
 
 ### Known open issues
 
