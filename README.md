@@ -175,8 +175,8 @@ Notes:
 - Fixes **3–7** (card reader D-cache, mounter IRQ, USB host MIDI, ISR-safe
   message posting) are in **C firmware** and apply to every platform that runs
   this firmware.
-- Fix **8** (patcher objref error) and **9** (drag sensitivity) are **Java** and
-  are platform independent.
+- Fixes **8** (patcher objref error), **9** (drag sensitivity) and **10** (objref
+  across polyphonic voices) are **Java** and are platform independent.
 
 Step-by-step recipes for **macOS Intel, Windows and Linux** are in
 [`docs/BUILD-OTHER-PLATFORMS.md`](docs/BUILD-OTHER-PLATFORMS.md) — including a
