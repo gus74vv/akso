@@ -18,6 +18,7 @@
 package axoloti.patch.object.attribute;
 
 import axoloti.object.attribute.AxoAttributeObjRef;
+import axoloti.patch.SubPatchMode;
 import axoloti.patch.object.AxoObjectInstance;
 import axoloti.patch.object.IAxoObjectInstance;
 import axoloti.utils.CharEscape;
@@ -57,14 +58,16 @@ public class AttributeInstanceObjRef extends AttributeInstanceString<AxoAttribut
                     + "), attribute '" + getName() + "' has no target object");
         }
         String o2 = "parent->";
-        /* FIXME: object references to object in parent patch...
-         if ((o.length() > 3) && (o.substring(0, 3).equals("../"))
-         && ((getObjectInstance().getPatchModel().getSettings().subpatchmode == SubPatchMode.polyphonic)
-         || (getObjectInstance().getPatchModel().getSettings().subpatchmode == SubPatchMode.polychannel)
-         || (getObjectInstance().getPatchModel().getSettings().subpatchmode == SubPatchMode.polyexpression))) {
-         o2 = o2 + "common->";
-         }
-         */
+        // inside a polyphonic voice, the first "../" must resolve to
+        // "parent->common->" instead of "parent->parent->" because
+        // the voice class has no "parent" member; it has "common"
+        // which points to the enclosing polyphonic patcher instance.
+        if ((o.length() > 3) && (o.substring(0, 3).equals("../"))
+                && ((getParent().getParent().getSubPatchMode() == SubPatchMode.polyphonic)
+                || (getParent().getParent().getSubPatchMode() == SubPatchMode.polychannel)
+                || (getParent().getParent().getSubPatchMode() == SubPatchMode.polyexpression))) {
+            o2 = "parent->common->";
+        }
         while ((o.length() > 3) && (o.substring(0, 3).equals("../"))) {
             o2 += "parent->";
             o = o.substring(3);

@@ -944,6 +944,7 @@ public class PatchViewCodegen extends View<PatchModel> {
 
         sLocalData.append(generatePresetCode3(""));
         sLocalData.append(generateModulationCode3());
+        sLocalData.append("   rootc *parent;\n");
         sLocalData.append("class voice {\n");
         sLocalData.append("   public:\n");
         sLocalData.append("   int polyIndex;\n");
@@ -989,8 +990,9 @@ public class PatchViewCodegen extends View<PatchModel> {
         ao.sLocalData = ao.sLocalData.replaceAll("parent->PExModulationPrevVal", "parent->common->PExModulationPrevVal");
         ao.sLocalData = ao.sLocalData.replaceAll("parent->GetModulationTable", "parent->common->GetModulationTable");
 
-        StringBuilder sInitCode = new StringBuilder(generateParamInitCodePlusPlusSub("", "parent"));
-
+        StringBuilder sInitCode = new StringBuilder();
+        sInitCode.append("   this->parent = parent;\n");
+        sInitCode.append(generateParamInitCodePlusPlusSub("", "parent"));
         sInitCode.append("int k;\n"
                 + "   for(k=0;k<nparams;k++){\n"
                 + "      PExch[k].pfunction = PropagateToVoices;\n"
