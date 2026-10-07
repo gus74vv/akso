@@ -44,6 +44,9 @@
 #include "ch.h"
 //#include "hal.h"
 #include "axoloti_board.h"
+/* El tipo global del OTG no expone el array de canales: se calcula igual que el
+ * driver (USBx_HC() en stm32h7xx_ll_usb.h, con USB_OTG_HOST_CHANNEL_BASE). */
+#define USBH_HC(i) ((USB_OTG_HostChannelTypeDef *)((uint32_t)USB_OTG_HS + USB_OTG_HOST_CHANNEL_BASE + ((i) * USB_OTG_HOST_CHANNEL_SIZE)))
 
 // USB_Setup_TypeDef MIDI_Setup;
 
@@ -170,6 +173,12 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost) {
                                 USB_EP_TYPE_BULK,
                                 MIDI_Handle->OutEpSize);
                 USBH_LL_SetToggle  (phost, MIDI_Handle->OutPipe,0);
+                /* El core host reintenta solo cuando el device responde NAK, pero
+                 * cada NAK levanta una IRQ: con un controlador conectado y el
+                 * bulk-IN poleado eso es un 'interrupt storm' (medido: ~20% de
+                 * CPU). Enmascarando el NAK el reintento sigue igual y sólo nos
+                 * enteramos del fin de la transferencia (XFRC). Ver USBH-DIAG.md. */
+                USBH_HC(MIDI_Handle->OutPipe)->HCINTMSK &= ~USB_OTG_HCINTMSK_NAKM;
 
                 // ring buffer ready to use
                 // usbh_midi_reset_buffer();
@@ -187,6 +196,8 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost) {
                                 USB_EP_TYPE_BULK,
                                 MIDI_Handle->InEpSize);
                 USBH_LL_SetToggle  (phost, MIDI_Handle->InPipe,0);
+                /* idem canal OUT: sin IRQ por NAK, el core reintenta solo. */
+                USBH_HC(MIDI_Handle->InPipe)->HCINTMSK &= ~USB_OTG_HCINTMSK_NAKM;
             }
             status = USBH_OK;
 

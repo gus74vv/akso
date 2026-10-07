@@ -275,7 +275,7 @@ mounted". Process: `Code Type: ARM64`.
 
 - The board shipped with the 2020 firmware (**CRC 0x9922E990**).
 - The new app embeds the firmware compiled from the current tree
-  (**CRC 0xA504289E** at that time; the current build is **7072DEBF**).
+  (**CRC 0xA504289E** at that time; the current build is **3238BAE5**, see `STATUS.md`).
 - The app offered the standard firmware update: the board entered DFU mode
   (STM32 ROM bootloader over USB; `dfu-util` x86_64 under Rosetta works fine),
   flashed and rebooted with the normal LED sequence ending in solid green.

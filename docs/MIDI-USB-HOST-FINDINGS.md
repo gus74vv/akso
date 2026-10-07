@@ -14,6 +14,10 @@ done.
 
 - **MIDI out → nanoKONTROL2 LEDs: SOLVED** (verified on hardware). One-line fix,
   see §5.
+- **"dsp load" rises with a controller plugged: SOLVED** (§11, 2026-10-07).
+  NAK interrupt storm in the USB host: the ISR ate 20% of the CPU; masked `NAKM`
+  on the MIDI channels → ~0%, with the patcher's dsp load now identical with and
+  without the controller. Firmware: pre-fix `0x7072DEBF`, with the fix `0x3238BAE5`.
 - **Controller hot-plug: NOT solved**, but there is a **workaround** (§9). It only
   hangs in one configuration: the USB-C(male)→USB-A(female) adapter left inserted
   in the **board's** host port, with the controller plugged into it afterwards.
@@ -326,3 +330,49 @@ case and is intentionally not part of `master`).
 objects driving the nanoKONTROL2 LEDs), the patcher console no longer prints any
 `midi output overflow` line and the board LED stays solid green. Firmware CRC32
 `7072DEBF` (1,211,744 bytes).
+
+---
+
+## 11. SOLVED — "dsp load" rises with a controller plugged: NAK interrupt storm (2026-10-07)
+
+**Symptom (VERIFIED):** with a MIDI controller in the host port the patcher's
+"dsp load" bar rises even for patches with no MIDI objects (~+60% relative,
+reported by the user). It does not depend on the patch.
+
+**Why the number moves:** `dspLoadPct` (`patch.c:243-259`) is measured with
+`DWT->CYCCNT` (`external/ChibiOS/os/common/ports/ARMCMx/chcore_v7m.h:781`), i.e.
+**wall-clock cycles**: it counts the time the DSP thread is *preempted* during its
+audio-period burst, not just its own work. Anything that steals cycles inside that
+window (USB host ISRs, cache/bus contention from the host DMA) shows up as extra
+"dsp load".
+
+**Root cause (MEASURED):** the host ISR was eating **20% of the CPU** while a
+controller was attached (0% without). The ST host core retries NAKed non-periodic
+transfers by itself, but **every NAK raises a channel interrupt**
+(`HCINTMSK_NAKM` is enabled for bulk/ctrl channels, see
+`external/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c:1557-1562`), and the MIDI
+class polls the bulk-IN endpoint continuously (`usbh_midi_core.c:290`). A device
+that mostly answers NAK therefore produces an interrupt storm driven by the
+SOF/microframe rate — the classic ST host "interrupt flood".
+
+**Fix:** clear `NAKM` in the channel interrupt mask of the two MIDI channels, right
+after `USBH_OpenPipe` in `USBH_MIDI_InterfaceInit` (`usbh_midi_core.c`). The
+hardware keeps retrying; software only learns about the transfer when it completes
+(XFRC). In the tree since 2026-10-07 (no compile-time flag).
+
+**Verified on hardware (nanoKONTROL2):** ISR load **20% → ~0%**; patcher "dsp load"
+identical with and without the controller; MIDI in/out without losses; patches
+go-live fine.
+
+**Firmware IDs:** pre-fix `0x7072DEBF`; with the fix `0x3238BAE5`.
+
+**How it was measured:** a diagnostic build (`-DUSBH_DIAG=1`) that times the OTG
+ISR (`Vector174`) with DWT and reports the ISR % in the ack `dspload` field (the
+patcher bar shows it) plus the IRQ rate in kHz in the `underruns` field (the
+"xrun" label of `TargetRTInfo`). See `docs/USBH-DIAG.md`, including the trap that
+the diagnostic build must **not** boot the stored `/start.bin` (a patch linked
+against a different ELF → hard fault → boot loop).
+
+**Caveat (project hard rule):** any firmware change that alters the symbol layout
+invalidates the patch stored on the SD (`/start.bin`). After flashing, re-upload it
+from the patcher ("Upload to SDCard as startup"), or the board will boot-loop.
