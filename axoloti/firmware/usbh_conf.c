@@ -47,6 +47,9 @@ HCD_HandleTypeDef hhcd;
 #include "midi_usbh.h"
 #include "midi.h"
 #include "midi_buffer.h"
+#if USBH_DIAG
+#include "usbh_diag.h"
+#endif
 
 USBH_HandleTypeDef hUSBHost __attribute__ ((section (".ram3"))) __attribute__ ((aligned (32))); /* USB Host handle */
 static void USBH_UserProcess(USBH_HandleTypeDef *pHost, uint8_t vId);
@@ -502,6 +505,10 @@ void MY_USBH_Init(void) {
   /* Init Host Library */
   USBH_Init(&hUSBHost, USBH_UserProcess, 0);
 
+#if USBH_DIAG
+  usbh_diag_init();
+#endif
+
   /* Initialize the USB host MIDI output ring buffers, so their notify
    * callback is valid before the first MidiSend() routed to a USB host
    * port (a NULL notify crashes in midi_output_buffer_put()). */
@@ -581,10 +588,17 @@ void fakefree(void * p){
 
 //STM32_OTG2_HANDLER
 CH_IRQ_HANDLER(Vector174) {
+#if USBH_DIAG
+  uint32_t diag_t0 = DWT->CYCCNT;
+#endif
   CH_IRQ_PROLOGUE();
   chSysLockFromISR();
   HAL_HCD_IRQHandler(&hhcd);
   chSysUnlockFromISR();
+#if USBH_DIAG
+  usbh_diag_isr_cycles += DWT->CYCCNT - diag_t0;
+  usbh_diag_isr_count++;
+#endif
 #ifdef DEBUG_ON_GPIO
   HAL_GPIO_WritePin( GPIOA, GPIO_PIN_0 | GPIO_PIN_1, GPIO_PIN_RESET);
 #endif

@@ -4,6 +4,8 @@
 
 *.log
 firmware/build/*
+firmware/build-diag/*
+firmware/.dep-diag/*
 firmware/flasher/flasher_build/*
 firmware/.dep/*
 control_firmware/build/*
@@ -129,3 +131,6 @@ xcode/
 
 
 firmware/TAGS
+firmware/build-backup-*/*
+firmware/build-fix/*
+firmware/.dep-fix/*

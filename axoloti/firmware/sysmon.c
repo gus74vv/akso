@@ -26,6 +26,9 @@
 #include "sysmon.h"
 #include "pconnection.h"
 #include "patch.h"
+#if USBH_DIAG
+#include "usbh_diag.h"
+#endif
 
 #if SDCARD_ENABLED
 #include "sdcard.h"
@@ -115,6 +118,10 @@ static THD_FUNCTION(ThreadSysmon, arg) {
         }
         sdcsw_prev = sdcsw;
 #endif
+#endif
+
+#if USBH_DIAG
+        usbh_diag_tick();
 #endif
 
         chThdSleepMilliseconds(100);

@@ -106,6 +106,10 @@ static uint32_t value;
 #define tx_hdr_acknowledge 0x416F7841   // "AxoA"
 #define tx_hdr_fwid        0x566f7841   // "AxoV"
 #define tx_hdr_log         0x546F7841   // "AxoT"
+
+#if USBH_DIAG
+#include "usbh_diag.h"
+#endif
 #define tx_hdr_memrd32     0x796f7841   // "Axoy"
 #define tx_hdr_memrdx      0x726f7841   // "Axor"
 #define tx_hdr_paramchange 0x516F7841   // "AxoQ"
@@ -127,6 +131,12 @@ tx_pckt_ack_v2_t tx_pckt_ack_v2 = {
 
 static msg_t bulk_tx_ack(void) {
 	tx_pckt_ack_v2.dspload = dspLoadPct;
+#if USBH_DIAG
+	/* diagnostic build: mode REPORT_ISR reports the USB host ISR load */
+	tx_pckt_ack_v2.dspload = usbh_diag_reported_load(dspLoadPct);
+	/* el panel RT de la app (label "xrun") muestra el ritmo de IRQs del USB, en kHz */
+	tx_pckt_ack_v2.underruns = usbh_diag_isr_hz / 1000u;
+#endif
 	tx_pckt_ack_v2.patchID = patchMeta.patchID;
 	tx_pckt_ack_v2.voltage = sysmon_getVoltage10() + (sysmon_getVoltage50() << 16);
 	if (patchStatus) {

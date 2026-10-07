@@ -499,6 +499,12 @@ void LoadPatch(const char *name) {
 }
 
 void LoadPatchStartSD(void) {
+#if USBH_DIAG
+    /* Build de diagnóstico (ver docs/USBH-DIAG.md): este firmware corre los
+     * símbolos, y el patch guardado se linkeó contra el ELF viejo -> hard
+     * fault -> reset loop. Así que acá no se arranca solo. */
+    return;
+#endif
 //    if (!palReadPad(SW2_PORT, SW2_PIN)) {
         strcpy(loadFName, "/START.BIN");
         loadPatchIndex = START_SD;
@@ -508,6 +514,10 @@ void LoadPatchStartSD(void) {
 }
 
 void LoadPatchStartFlash(void) {
+#if USBH_DIAG
+    /* idem LoadPatchStartSD: no arrancar un patch compilado contra otro ELF */
+    return;
+#endif
     loadPatchIndex = START_FLASH;
     chEvtSignal(pThreadDSP, THREAD_DSP_EVT_MASK_LOAD);
 }

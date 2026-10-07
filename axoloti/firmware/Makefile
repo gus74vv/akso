@@ -491,6 +491,14 @@ ULIBS = -lm
 #
 # End of user defines
 ##############################################################################
+##############################################################################
+# Diagnostic build (see USBH-DIAG.md): adds usbh_diag.c and -DUSBH_DIAG=1.
+#   make USBH_DIAG=1 BUILDDIR=build-diag DEPDIR=.dep-diag
+# Optional: USBH_DIAG_MODE=0..3 selects the initial mode (0 = normal).
+ifdef USBH_DIAG
+CSRC += ${FIRMWARE}/usbh_diag.c
+UDEFS += -DUSBH_DIAG=1
+endif
 RULESPATH = $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk
 include $(RULESPATH)/arm-none-eabi.mk
 include $(RULESPATH)/rules.mk
