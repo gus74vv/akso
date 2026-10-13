@@ -109,7 +109,7 @@ ${BDIR}/xpatch.h.gch: ${FIRMWARE}/xpatch.h ${FIRMWARE}/patch.h ${FIRMWARE}/axolo
 	@$(CPP) $(CCFLAGS) $(MODULE_BINC) $(MODULE_INC) $(IINCDIR) -Winvalid-pch --include ${BDIR}/xpatch.h -c "$<" -o "$@"
 
 %.elf: %.o
-	@$(LD) $(LDFLAGS) "$<" ${MODULE_LINKDIR} ${MODULE_LINKLIB} -Wl,-Map="$(@:.elf=.map)",--cref,--just-symbols=${FIRMWARE}/build/axoloti.elf -o "$@"
+	@$(LD) $(LDFLAGS) "$<" -lm ${MODULE_LINKDIR} ${MODULE_LINKLIB} -Wl,-Map="$(@:.elf=.map)",--cref,--just-symbols=${FIRMWARE}/build/axoloti.elf -o "$@"
 
 %.sram1.bin: %.elf
 	@$(CP) -O binary -R .sdram.* -R .rodata -R .rodata.* -R .data -R .data.* "$<" "$@"

@@ -118,12 +118,13 @@ typedef struct ui_object {
 //        else
 //        if (!classname.equals("one"))
 //        c.append("parent = _parent;\n");
-        if (getDModel().getDModel() instanceof AxoObjectPatcher) {
-            // subpatcher instances keep a back-pointer to the enclosing
-            // patcher, so object references with "../" resolve across
-            // patch levels (see AttributeInstanceObjRef.CValue())
-            c.append("   this->parent = parent;\n");
-        }
+        // every instance keeps a back-pointer to the enclosing patcher:
+        // - subpatchers need it so object references with "../" resolve
+        //   across patch levels (see AttributeInstanceObjRef.CValue())
+        // - all objects need it so objref attributes used inside user-defined
+        //   helper functions (declared in code.declaration, which does not
+        //   receive the "parent" parameter that Init/dsp/krate get) compile
+        c.append("   this->parent = parent;\n");
         for (ParameterInstanceView p : parameterInstances) {
             if (p.getDModel().getDModel().PropagateToChild != null) {
                 c.append("// on Parent: propagate " + p.getDModel().getName() + " " + enableOnParent + " " + getDModel().getLegalName() + "" + p.getDModel().getDModel().PropagateToChild + "\n");
@@ -307,10 +308,10 @@ typedef struct ui_object {
         s.append("class " + getDModel().getCInstanceName() + "{\n");
         s.append("  public: // v1\n");
         s.append(generateInstanceCodePlusPlus(ClassName, enableOnParent));
-        if (getDModel().getDModel() instanceof AxoObjectPatcher) {
-            // back-pointer to the enclosing patcher for "../" object refs
-            s.append(ClassName + " *parent;\n");
-        }
+        // back-pointer to the enclosing patcher: resolves "../" object refs
+        // (subpatchers) and objref attributes inside user-defined helper
+        // functions (all objects) — see AttributeInstanceObjRef.CValue()
+        s.append(ClassName + " *parent;\n");
         s.append(generateInitCodePlusPlus(ClassName, enableOnParent));
         s.append(generateDisposeCodePlusPlus(ClassName));
         s.append(generateDoFunctionPlusPlus(ClassName, OnParentAccess, enableOnParent));
