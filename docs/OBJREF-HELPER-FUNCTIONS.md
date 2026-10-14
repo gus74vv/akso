@@ -154,9 +154,11 @@ Memory region         Used Size  Region Size  %age Used
 done /Users/gustavo/Library/Akso/build/xpatch
 ```
 
-In-app verification (restart app → Live with `Beatslicer_Demo2.axp`) pending
-at the time of writing; the jar with the fix is deployed to both bundles
-(`Axoloti.jar.bak-preparentmember` kept in each).
+In-app verification done (2026-10-13): `Beatslicer_Demo2.axp` compiles with
+the new jar. Published as release **`v3.0.4.1-arm64`**
+(`Akso-3.0.4.1-hotfix.zip`: rebuilt `Axoloti.jar` + `firmware/Makefile.patch`
++ install instructions; applies over 3.0.2–3.0.4). The jar is deployed to
+both bundles (`Axoloti.jar.bak-preparentmember` kept in each).
 
 ## Files changed
 
