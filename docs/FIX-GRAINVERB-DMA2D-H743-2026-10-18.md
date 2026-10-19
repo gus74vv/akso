@@ -1,12 +1,11 @@
 # Fix: `jt/granular/grainverb` — STM32F427-only DMA2D code on the AKSO (STM32H743)
 
 - **Date:** 2026-10-18
-- **Status:** FIXED in the app library (option "B", no-DMA path).
-  `grainverb` **validated on hardware by the user 2026-10-18** (compiles and
-  works). A compiler warning it produced (`-Waggressive-loop-optimizations`,
-  signed overflow of the phase accumulator) was fixed the same day by making
-  the accumulator unsigned. `graintable` and `graindelay` received the identical
-  fix the same day (pending Live validation).
+- **Status:** FIXED and **VALIDATED ON HARDWARE for all three objects by the
+  user (2026-10-18)**: `grainverb`, `graintable` and `graindelay` compile and
+  work (option "B", CPU-copy path). The `-Waggressive-loop-optimizations`
+  warning (signed overflow of the phase accumulator) was also fixed by making
+  the accumulator unsigned.
 - **Scope decision (same day, by Gustavo):** this time the community-library
   object **is** being fixed, explicitly (contrast with the reverted
   `autoSource` fix of 2026-10-08, `FIX-AUTOSOURCE-MODSOURCES-2026-10-08.md`).
@@ -115,8 +114,8 @@ same option-B treatment (remove the DMA2D helpers, the FMC hack and the
 `.sram2` buffers; `#if 1 // use DMA` → `#if 0` so the object's own CPU-copy
 branch runs) was **applied to both on 2026-10-18**, with backups:
 `graintable.axo.bak-preNODMAfix-20261018` and
-`graindelay.axo.bak-preNODMAfix-20261018`. Pending Live validation on
-hardware for these two.
+`graindelay.axo.bak-preNODMAfix-20261018`. Both validated on hardware by the
+user the same day.
 
 **Extra fix (all three objects):** the CPU-copy branch triggered
 `warning: iteration 7 invokes undefined behavior [-Waggressive-loop-optimizations]`
