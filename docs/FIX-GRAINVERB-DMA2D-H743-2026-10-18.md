@@ -1,9 +1,12 @@
 # Fix: `jt/granular/grainverb` — STM32F427-only DMA2D code on the AKSO (STM32H743)
 
 - **Date:** 2026-10-18
-- **Status:** FIXED in the app library (option "B", no-DMA path). **Not yet
-  validated on hardware** — pending a Live session with a patch that uses the
-  object.
+- **Status:** FIXED in the app library (option "B", no-DMA path).
+  `grainverb` **validated on hardware by the user 2026-10-18** (compiles and
+  works). A compiler warning it produced (`-Waggressive-loop-optimizations`,
+  signed overflow of the phase accumulator) was fixed the same day by making
+  the accumulator unsigned. `graintable` and `graindelay` received the identical
+  fix the same day (pending Live validation).
 - **Scope decision (same day, by Gustavo):** this time the community-library
   object **is** being fixed, explicitly (contrast with the reverted
   `autoSource` fix of 2026-10-08, `FIX-AUTOSOURCE-MODSOURCES-2026-10-08.md`).
@@ -95,18 +98,29 @@ purpose, same convention as the autoSource incident.)
 the reverb behaves (expect CPU-copy audio; no board session was run as part of
 this change).
 
-## Follow-up: same broken scaffold in two more `jt/granular` objects
+## Follow-up (DONE 2026-10-18): the same fix extended to the whole `jt/granular` family
 
-`jt/granular/graintable.axo` and `jt/granular/graindelay.axo` contain the
+`jt/granular/graintable.axo` and `jt/granular/graindelay.axo` contained the
 **identical** STM32F427-only scaffold (verified by grep over
-`~/Library/Akso/objects` + `akso-community/objects`):
+`~/Library/Akso/objects` + `akso-community/objects` — nothing outside
+`jt/granular` uses `DMA2D`, `DMA2D_IFSR_*`, `RCC_AHB1*_DMA2D*` or `0xA0000140`):
 
 - `DMA2D->IFCR |= DMA2D_IFSR_CTEIF/CTCIF`,
 - `RCC->AHB1ENR |= RCC_AHB1ENR_DMA2DEN; RCC->AHB1RSTR …DMA2DRST`,
 - `save_FMC_SDCR1 = *((uint32_t *)0xA0000140); …`,
 - `dmabuf1/2` in `section(".sram2")`.
 
-They will fail to compile with exactly the same four errors. Both have the same
-`#if 1 // use DMA` / `#else` structure as `grainverb`, so the same option-B
-treatment applies to each. Decision pending: the other `jt/granular` objects
-(`graintable`, `graindelay`) are **not** fixed by this incident.
+They would have failed to compile with exactly the same four errors. The
+same option-B treatment (remove the DMA2D helpers, the FMC hack and the
+`.sram2` buffers; `#if 1 // use DMA` → `#if 0` so the object's own CPU-copy
+branch runs) was **applied to both on 2026-10-18**, with backups:
+`graintable.axo.bak-preNODMAfix-20261018` and
+`graindelay.axo.bak-preNODMAfix-20261018`. Pending Live validation on
+hardware for these two.
+
+**Extra fix (all three objects):** the CPU-copy branch triggered
+`warning: iteration 7 invokes undefined behavior [-Waggressive-loop-optimizations]`
+on `phl += incr1` — the per-grain phase accumulator is *meant* to wrap mod
+2<sup>32</sup>, but as a signed `int` that is signed-overflow UB. Changing the
+local to `uint32_t phl = phase;` makes the wrap defined and silences the
+warning without changing behavior.
